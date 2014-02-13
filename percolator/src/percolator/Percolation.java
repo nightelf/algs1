@@ -1,36 +1,64 @@
+/**
+ * Percolator package.
+ */
 package percolator;
 
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
-    
-final public class Percolation {
 
+/**
+ * Percolation class.
+ */
+public final class Percolation {
+
+    /**
+     * An instance of the WeightedQuickUnionUF class.
+     */
     private WeightedQuickUnionUF uf;
+
+    /**
+     * An array telling which sites are open.
+     */
     private int[] open;
-    private int N;
+
+    /**
+     * The row or column size for the square matrix.
+     */
+    private int rowSize;
+
+    /**
+     * The index of the top site.
+     */
     private int topIndex;
+
+    /**
+     * The index of the bottom site.
+     */
     private int bottomIndex;
+
+    /**
+     * the total number of sites (N + 2).
+     */
     private int numSites;
-    private static final int closedValue = 0;
-    
+
     /**
      * The open value for the open array.
      */
-    private static final int openValue = 1;
+    private static final int OPEN_VALUE = 1;
 
     /**
      * Create N-by-N grid, with all sites blocked.
-     * @param N the row /column size
+     * @param nSize the row /column size
      */
-    public Percolation(final int N) {
+    public Percolation(int N) {
 
-        this.N = N;
-        numSites = N * N + 2;
+        this.rowSize = N;
+        numSites = rowSize * rowSize + 2;
         uf = new WeightedQuickUnionUF(numSites);
         open = new int[numSites];
         topIndex = 0;
-        open[topIndex] = openValue;
+        open[topIndex] = OPEN_VALUE;
         bottomIndex = numSites - 1;
-        open[bottomIndex] = openValue;
+        open[bottomIndex] = OPEN_VALUE;
     }
 
     /**
@@ -38,7 +66,7 @@ final public class Percolation {
      * @param i row coordinate
      * @param j column coordinate
      */
-    public void open(final int i, final int j) {
+    public void open(int i, int j) {
 
         if (!isInBounds(i, j)) {
             throw new IndexOutOfBoundsException();
@@ -46,10 +74,10 @@ final public class Percolation {
 
         int p = getIndex(i, j);
         int q;
-        if (open[p] == openValue) {
+        if (open[p] == OPEN_VALUE) {
             return;
         } else {
-            open[p] = openValue;
+            open[p] = OPEN_VALUE;
         }
 
         // union top
@@ -57,17 +85,17 @@ final public class Percolation {
             uf.union(p, topIndex);
         } else {
             q = getIndex(i - 1, j);
-            if (open[q] == openValue) {
+            if (open[q] == OPEN_VALUE) {
                 uf.union(p, q);
             }
         }
 
         // union bottom
-        if (i == N) {
+        if (i == rowSize) {
             uf.union(p, bottomIndex);
         } else {
             q = getIndex(i + 1, j);
-            if (open[q] == openValue) {
+            if (open[q] == OPEN_VALUE) {
                 uf.union(p, q);
             }
         }
@@ -75,15 +103,15 @@ final public class Percolation {
         // union left
         if (j != 1) {
             q = getIndex(i, j - 1);
-            if (open[q] == openValue) {
+            if (open[q] == OPEN_VALUE) {
                 uf.union(p, q);
             }
         }
 
         // union right
-        if (j != N) {
+        if (j != rowSize) {
             q = getIndex(i, j + 1);
-            if (open[q] == openValue) {
+            if (open[q] == OPEN_VALUE) {
                 uf.union(p, q);
             }
         }
@@ -95,14 +123,14 @@ final public class Percolation {
      * @param j column index
      * @return boolean
      */
-    public boolean isOpen(final int i, final int j) {
+    public boolean isOpen(int i, int j) {
 
         if (!isInBounds(i, j)) {
             throw new IndexOutOfBoundsException();
         }
 
         int index = getIndex(i, j);
-        return open[index] == openValue;
+        return open[index] == OPEN_VALUE;
     }
 
     /**
@@ -111,14 +139,14 @@ final public class Percolation {
      * @param j column index
      * @return boolean
      */
-    public boolean isFull(final int i, final int j) {
+    public boolean isFull(int i, int j) {
 
         if (!isInBounds(i, j)) {
             throw new IndexOutOfBoundsException();
         }
 
         int p = getIndex(i, j);
-        return open[p] == openValue && uf.connected(p, topIndex);
+        return open[p] == OPEN_VALUE && uf.connected(p, topIndex);
     }
 
     /**
@@ -136,9 +164,9 @@ final public class Percolation {
      * @param j column index
      * @return integer
      */
-    private int getIndex(final int i, final int j) {
+    private int getIndex(int i, int j) {
 
-        return (i - 1) * N + j;
+        return (i - 1) * rowSize + j;
     }
 
     /**
@@ -147,8 +175,8 @@ final public class Percolation {
      * @param j column index
      * @return boolean
      */
-    private boolean isInBounds(final int i, final int j) {
+    private boolean isInBounds(int i, int j) {
 
-        return i >= 1 && i <= N && j >= 1 && j <= N;
+        return i >= 1 && i <= rowSize && j >= 1 && j <= rowSize;
     }
 }
