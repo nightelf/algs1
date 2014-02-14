@@ -11,6 +11,11 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 public final class Percolation {
 
     /**
+     * The open value for the open array.
+     */
+    private static final int OPEN_VALUE = 1;
+
+    /**
      * An instance of the WeightedQuickUnionUF class.
      */
     private WeightedQuickUnionUF unionFind;
@@ -39,11 +44,6 @@ public final class Percolation {
      * the total number of sites (N + 2).
      */
     private int numSites;
-
-    /**
-     * The open value for the open array.
-     */
-    private static final int OPEN_VALUE = 1;
 
     /**
      * Create N-by-N grid, with all sites blocked.
