@@ -13,7 +13,7 @@ public final class Percolation {
     /**
      * An instance of the WeightedQuickUnionUF class.
      */
-    private WeightedQuickUnionUF uf;
+    private WeightedQuickUnionUF unionFind;
 
     /**
      * An array telling which sites are open.
@@ -53,10 +53,12 @@ public final class Percolation {
 
         this.rowSize = N;
         numSites = rowSize * rowSize + 2;
-        uf = new WeightedQuickUnionUF(numSites);
+        unionFind = new WeightedQuickUnionUF(numSites);
+        
         open = new int[numSites];
         topIndex = 0;
         open[topIndex] = OPEN_VALUE;
+        
         bottomIndex = numSites - 1;
         open[bottomIndex] = OPEN_VALUE;
     }
@@ -82,21 +84,21 @@ public final class Percolation {
 
         // union top
         if (i == 1) {
-            uf.union(p, topIndex);
+            unionFind.union(p, topIndex);
         } else {
             q = getIndex(i - 1, j);
             if (open[q] == OPEN_VALUE) {
-                uf.union(p, q);
+                unionFind.union(p, q);
             }
         }
 
         // union bottom
         if (i == rowSize) {
-            uf.union(p, bottomIndex);
+            unionFind.union(p, bottomIndex);
         } else {
             q = getIndex(i + 1, j);
             if (open[q] == OPEN_VALUE) {
-                uf.union(p, q);
+                unionFind.union(p, q);
             }
         }
 
@@ -104,7 +106,7 @@ public final class Percolation {
         if (j != 1) {
             q = getIndex(i, j - 1);
             if (open[q] == OPEN_VALUE) {
-                uf.union(p, q);
+                unionFind.union(p, q);
             }
         }
 
@@ -112,7 +114,7 @@ public final class Percolation {
         if (j != rowSize) {
             q = getIndex(i, j + 1);
             if (open[q] == OPEN_VALUE) {
-                uf.union(p, q);
+                unionFind.union(p, q);
             }
         }
     }
@@ -146,7 +148,7 @@ public final class Percolation {
         }
 
         int p = getIndex(i, j);
-        return open[p] == OPEN_VALUE && uf.connected(p, topIndex);
+        return open[p] == OPEN_VALUE && unionFind.connected(p, topIndex);
     }
 
     /**
@@ -155,7 +157,7 @@ public final class Percolation {
      */
     public boolean percolates() {
 
-        return uf.connected(bottomIndex, topIndex);
+        return unionFind.connected(bottomIndex, topIndex);
     }
 
     /**

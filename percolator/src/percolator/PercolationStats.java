@@ -1,34 +1,50 @@
 package percolator;
 
-import edu.princeton.cs.introcs.StdIn;
-import edu.princeton.cs.introcs.StdOut;
 import edu.princeton.cs.introcs.StdRandom;
 import edu.princeton.cs.introcs.StdStats;
 
+/**
+ * Percolation Statistics.
+ */
 public class PercolationStats {
 
     /**
-     * The row or column size
+     * Standard Normal Deviate.
+     */
+    public static final double STD_NORMAL_DEVIATE = 1.96;
+
+    /**
+     * The row or column size.
      */
     private int rowSize;
 
     /**
-     * The number of experiments
+     * The number of experiments.
      */
-    private int numExp;
+    private int numExperiments;
 
     /**
-     * Matrix size
+     * Matrix size.
      */
     private int size;
 
     /**
-     * An array of the thresholds determined by the experiment
+     * Mean: cached so no need to recompute.
+     */
+    private double meanCalc = -1.0;
+
+    /**
+     * Standard Deviation: cached so no need to recompute.
+     */
+    private double stdDevCalc = -1.0;
+
+    /**
+     * An array of the thresholds determined by the experiment.
      */
     private double[] threshold;
 
     /**
-     * Perform T independent computational experiments on an N-by-N grid
+     * Perform T independent computational experiments on an N-by-N grid.
      * @param N row / column size
      * @param T number of experiments
      */
@@ -46,75 +62,93 @@ public class PercolationStats {
 
         rowSize = N;
         size = rowSize * rowSize;
-        numExp = T;
+        numExperiments = T;
         threshold = new double[T];
+
+        computeThreshold();
     }
 
     /**
-     * sample mean of percolation threshold
+     * Computes the average threshold.
      */
-    public double mean() {
+    private void computeThreshold() {
 
-        return StdStats.mean(threshold);
-    }
-
-    /**
-     * sample standard deviation of percolation threshold
-     */
-    public double stddev() {
-
-        return StdStats.stddev(threshold);
-    }
-
-    /**
-     * returns lower bound of the 95% confidence interval
-     */
-    public double confidenceLo() {
-        return mean() - 1.96 * Math.sqrt(stddev()) / Math.sqrt(numExp);
-    }
-
-    /**
-     * returns upper bound of the 95% confidence intervall
-     */
-    public double confidenceHi() {
-
-        return mean() + 1.96 * Math.sqrt(stddev()) / Math.sqrt(numExp);
-    }
-
-    /**
-     * test client, described below
-     */
-    public static void main(String[] args) {
-
-        StdOut.println("Starting!");
-        int N = Integer.parseInt(args[0]);
-        int T = Integer.parseInt(args[1]);
-//        int N = StdIn.readInt();
-//        int T = StdIn.readInt();
-
-        PercolationStats perkyStats = new PercolationStats(N, T);
-        
         int x, y, numOpened;
-        
-        for (int i = 0; i < T; i++) {
+        for (int i = 0; i < numExperiments; i++) {
             numOpened = 0;
-            Percolation perky = new Percolation(N);
+            Percolation perky = new Percolation(rowSize);
             while (!perky.percolates()) {
-                x = StdRandom.uniform(perkyStats.rowSize) + 1;
-                y = StdRandom.uniform(perkyStats.rowSize) + 1;
-                if (!perky.isOpen(x, y)){
+                x = StdRandom.uniform(rowSize) + 1;
+                y = StdRandom.uniform(rowSize) + 1;
+                if (!perky.isOpen(x, y)) {
                     perky.open(x, y);
                     numOpened++;
                 }
             }
-            
-            perkyStats.threshold[i] = (double) numOpened / perkyStats.size;
+            threshold[i] = (double) numOpened / size;
         }
-        
-        StdOut.println("average: " + perkyStats.mean());
-        StdOut.println("stddev: " + perkyStats.stddev());
-        StdOut.println("95% Confindence Low: " + perkyStats.confidenceLo());
-        StdOut.println("95% Confindence High: " + perkyStats.confidenceHi());
-        StdOut.println("Ending!");
+    }
+
+    /**
+     * sample mean of percolation threshold.
+     * @return double
+     */
+    public double mean() {
+
+        if (meanCalc < 0.0) {
+            meanCalc = StdStats.mean(threshold);
+        }
+
+        return meanCalc;
+    }
+
+    /**
+     * sample standard deviation of percolation threshold.
+     * @return double
+     */
+    public double stddev() {
+
+        if (stdDevCalc < 0.0) {
+            stdDevCalc = StdStats.stddev(threshold);
+        }
+
+        return stdDevCalc;
+    }
+
+    /**
+     * returns lower bound of the 95% confidence interval.
+     * @return double
+     */
+    public double confidenceLo() {
+        return mean() - STD_NORMAL_DEVIATE
+            * Math.sqrt(stddev()) / Math.sqrt(numExperiments);
+    }
+
+    /**
+     * returns upper bound of the 95% confidence interval.
+     * @return double
+     */
+    public double confidenceHi() {
+
+        return mean() + STD_NORMAL_DEVIATE
+            * Math.sqrt(stddev()) / Math.sqrt(numExperiments);
+    }
+
+    /**
+     * test client, described below.
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+
+        int N = Integer.parseInt(args[0]);
+        int T = Integer.parseInt(args[1]);
+
+        PercolationStats perkyStats = new PercolationStats(N, T);
+        System.out.println("average: " + perkyStats.mean());
+        System.out.println("stddev: " + perkyStats.stddev());
+        System.out.println("95% Confindence Low: "
+            + perkyStats.confidenceLo());
+        System.out.println("95% Confindence High: "
+            + perkyStats.confidenceHi());
     }
 }
