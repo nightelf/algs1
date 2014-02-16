@@ -1,13 +1,14 @@
 package structures;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class Deque<Item> implements Iterable<Item> {
 
     /**
      * Size of the deque.
      */
-    private static final int CAPACITY_START = 10;
+    private static final int CAPACITY_START = 4;
 
     /**
      * deque items.
@@ -30,7 +31,7 @@ public class Deque<Item> implements Iterable<Item> {
     private int tail = 0;
 
     /**
-     * construct an empty deque.
+     * Construct an empty deque.
      */
     public Deque() {
 
@@ -38,9 +39,8 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     /**
-     * is the deque empty?
-     * 
-     * @return
+     * Is the deque empty?
+     * @return boolean
      */
     public boolean isEmpty() {
 
@@ -48,8 +48,7 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     /**
-     * return the number of items on the deque.
-     * 
+     * Return the number of items on the deque.
      * @return
      */
     public int size() {
@@ -59,34 +58,32 @@ public class Deque<Item> implements Iterable<Item> {
 
     /**
      * insert the item at the head.
-     * 
-     * @param item
+     * @param item the item.
      */
     public void addFirst(Item item) {
 
-        conditionalGrow();
-        if (head == s.length - 1) {
-        	s[head] = item;
-        	head = 0;
-        } else {
-        	s[head++] = item;
+        if (null == item) {
+            throw new NullPointerException();
         }
+        conditionalGrow();
+        int newHead = getIncrementIndex(head);
+        s[head] = item;
+        head = newHead;
         N++;
     }
 
     /**
-     * insert the item at the end.
-     * 
-     * @param item
+     * insert the item at the tail.
+     * @param item the item.
      */
     public void addLast(Item item) {
 
-        conditionalGrow();
-        if (tail == 0) {
-        	s[tail] = item;
-        	head = s.length - 1;
+        if (null == item) {
+            throw new NullPointerException();
         }
-        s[tail--] = item;
+        conditionalGrow();
+        tail = getDecrementIndex(tail);
+        s[tail] = item;
         N++;
     }
 
@@ -97,39 +94,30 @@ public class Deque<Item> implements Iterable<Item> {
      */
     public Item removeFirst() {
 
-        conditionalShrink();
-        if (head == 0) {
-
-        	head = s.length - 1;
-        	N--;
-        	return s[0];
-        } else {
-        
-        	N--;
-        	return s[head--];
+        if (0 == N) {
+            throw new NoSuchElementException ();
         }
-
+        conditionalShrink();
+        head = getDecrementIndex(head);
+        N--;
+        return s[head];
     }
 
     /**
-     * delete and return the item at the end.
+     * delete and return the item at the tail.
      * 
      * @return
      */
     public Item removeLast() {
 
-        conditionalShrink();
-        if (tail == s.length - 1) {
-
-        	tail = 0;
-        	N--;
-        	return s[s.length - 1];
-        } else {
-        	
-        	N--;
-        	return s[tail++];
+        if (0 == N) {
+            throw new NoSuchElementException ();
         }
-
+        conditionalShrink();
+        int oldTail = getIncrementIndex(tail);
+        tail = getIncrementIndex(tail);
+        N--;
+        return s[oldTail];
     }
 
     /**
@@ -140,6 +128,9 @@ public class Deque<Item> implements Iterable<Item> {
         return new DequeIterator();
     }
 
+    /**
+     * Conditionally grow the array if size is at capacity.
+     */ 
     private void conditionalGrow() {
 
         if (N == s.length) {
@@ -147,20 +138,57 @@ public class Deque<Item> implements Iterable<Item> {
         }
     }
 
+    /**
+     * Conditionally shrink the array if size is 1/4 capacity.
+     */
     private void conditionalShrink() {
 
-        if (N > 0 && N == s.length / 4) {
+        if (N > 0 && N < s.length / 4) {
             resize(s.length / 2);
         }
     }
 
+    /**
+     * Resize the array.
+     * @param capacity
+     */
     private void resize(int capacity) {
-    
+
         Item[] copy = (Item[]) new Object[capacity];
-        for (int i = 0, j = tail; i < N; i++) {
+        for (int i = 0, j = tail; i < N; i++, j = getIncrementIndex(j)) {
             copy[i] = s[j];
         }
         s = copy;
+        tail = 0;
+        head = N;
+    }
+
+    /**
+     * Gets the incremented index for the circularly buffered array.
+     * @param index the index to be decremented.
+     * @return integer
+     */
+    private int getIncrementIndex(int index) {
+
+        if (index == s.length - 1) {
+            return 0;
+        } else {
+            return ++index;
+        }
+    }
+
+    /**
+     * Gets the decremented index for the circularly buffered array.
+     * @param index the index to be decremented.
+     * @return integer
+     */
+    private int getDecrementIndex(int index) {
+        
+        if (index == 0) {
+            return s.length - 1;
+        } else {
+            return --index;
+        }
     }
 
     /**
@@ -168,35 +196,70 @@ public class Deque<Item> implements Iterable<Item> {
      */
     private class DequeIterator implements Iterator<Item> {
 
+        private int current = head;
+        
         /**
          * Is there a next element?
          */
         public boolean hasNext() {
-            return true;
+            
+            return current != tail;
         }
 
         /**
          * Not implemented.
          */
         public void remove() {
-
+            
+            throw new UnsupportedOperationException();
         }
 
         /**
          * Return the next item.
          */
         public Item next() {
-            
-            return s[0];
+
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            current = getDecrementIndex(current);
+            return s[current];
         }
+    }
+
+    public int arraySize() {
+        return s.length;
     }
 
     /**
      * unit testing.
-     * 
      * @param args
      */
     public static void main(String[] args) {
 
+        int i;
+        Deque<String> d = new Deque<String>();
+        String testStr = "foo";
+
+        for (i = 0; i < 20; i++) {
+            d.addFirst(testStr);
+            System.out.println(d.N);
+            System.out.println(d.head);
+            System.out.println(d.tail);
+            System.out.println(d.arraySize());
+            System.out.println("==========");
+        }
+
+        for (String s: d)
+            System.out.println(s);
+
+        for (i = 0; i < 20; i++) {
+            System.out.println(d.removeFirst());
+            System.out.println(d.N);
+            System.out.println(d.head);
+            System.out.println(d.tail);
+            System.out.println(d.arraySize());
+            System.out.println("==========");
+        }
     }
 }
