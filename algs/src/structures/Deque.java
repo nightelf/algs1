@@ -3,12 +3,21 @@ package structures;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * A Deque class.
+ * @param <Item>
+ */
 public class Deque<Item> implements Iterable<Item> {
 
     /**
      * Size of the deque.
      */
     private static final int CAPACITY_START = 4;
+
+    /**
+     * The shrink divisor. 1/4 the size of hte array.
+     */
+    private static final int SHRINK_DIVISOR = 4;
 
     /**
      * deque items.
@@ -57,7 +66,7 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     /**
-     * insert the item at the head.
+     * Insert the item at the head.
      * @param item the item.
      */
     public void addFirst(Item item) {
@@ -88,14 +97,13 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     /**
-     * delete and return the item at the head.
-     * 
-     * @return
+     * Delete and return the item at the head.
+     * @return Item
      */
     public Item removeFirst() {
 
-        if (0 == N) {
-            throw new NoSuchElementException ();
+        if (isEmpty()) {
+            throw new NoSuchElementException();
         }
         conditionalShrink();
         head = getDecrementIndex(head);
@@ -104,17 +112,16 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     /**
-     * delete and return the item at the tail.
-     * 
-     * @return
+     * Delete and return the item at the tail.
+     * @return Item
      */
     public Item removeLast() {
 
-        if (0 == N) {
-            throw new NoSuchElementException ();
+        if (isEmpty()) {
+            throw new NoSuchElementException();
         }
         conditionalShrink();
-        int oldTail = getIncrementIndex(tail);
+        int oldTail = tail;
         tail = getIncrementIndex(tail);
         N--;
         return s[oldTail];
@@ -122,15 +129,16 @@ public class Deque<Item> implements Iterable<Item> {
 
     /**
      * return an iterator over items in order from head to end.
+     * @return DequeIterator
      */
     public Iterator<Item> iterator() {
-        
+
         return new DequeIterator();
     }
 
     /**
      * Conditionally grow the array if size is at capacity.
-     */ 
+     */
     private void conditionalGrow() {
 
         if (N == s.length) {
@@ -143,14 +151,14 @@ public class Deque<Item> implements Iterable<Item> {
      */
     private void conditionalShrink() {
 
-        if (N > 0 && N < s.length / 4) {
+        if (N > 0 && N < s.length / SHRINK_DIVISOR) {
             resize(s.length / 2);
         }
     }
 
     /**
      * Resize the array.
-     * @param capacity
+     * @param capacity the capacity of the array.
      */
     private void resize(int capacity) {
 
@@ -183,7 +191,7 @@ public class Deque<Item> implements Iterable<Item> {
      * @return integer
      */
     private int getDecrementIndex(int index) {
-        
+
         if (index == 0) {
             return s.length - 1;
         } else {
@@ -196,13 +204,17 @@ public class Deque<Item> implements Iterable<Item> {
      */
     private class DequeIterator implements Iterator<Item> {
 
+        /**
+         * The current position in the iterator.
+         */
         private int current = head;
-        
+
         /**
          * Is there a next element?
+         * @return boolean
          */
         public boolean hasNext() {
-            
+
             return current != tail;
         }
 
@@ -210,12 +222,13 @@ public class Deque<Item> implements Iterable<Item> {
          * Not implemented.
          */
         public void remove() {
-            
+
             throw new UnsupportedOperationException();
         }
 
         /**
          * Return the next item.
+         * @return Item
          */
         public Item next() {
 
@@ -227,39 +240,50 @@ public class Deque<Item> implements Iterable<Item> {
         }
     }
 
-    public int arraySize() {
-        return s.length;
-    }
-
     /**
-     * unit testing.
-     * @param args
+     * Unit testing.
+     * @param args the arguments.
      */
     public static void main(String[] args) {
 
-        int i;
         Deque<String> d = new Deque<String>();
-        String testStr = "foo";
 
-        for (i = 0; i < 20; i++) {
-            d.addFirst(testStr);
-            System.out.println(d.N);
-            System.out.println(d.head);
-            System.out.println(d.tail);
-            System.out.println(d.arraySize());
-            System.out.println("==========");
-        }
-
-        for (String s: d)
-            System.out.println(s);
-
-        for (i = 0; i < 20; i++) {
+        assert d.size() == 0;
+        assert d.isEmpty() == true;
+        d.addFirst("Jack");
+        assert d.isEmpty() == false;
+        assert d.removeFirst() == "Jack";
+        assert d.isEmpty() == true;
+        assert d.size() == 0;
+        d.addFirst("and");
+        assert d.size() == 1;
+        assert d.removeLast() == "and";
+        assert d.size() == 0;
+        d.addLast("Jill");
+        assert d.size() == 1;
+        assert d.removeFirst() == "Jill";
+        assert d.size() == 0;
+        try {
             System.out.println(d.removeFirst());
-            System.out.println(d.N);
-            System.out.println(d.head);
-            System.out.println(d.tail);
-            System.out.println(d.arraySize());
-            System.out.println("==========");
+            assert false;
+        } catch (NoSuchElementException e) {
+            assert true;
         }
+        d.addLast("went");
+        d.addLast("to");
+        assert d.size() == 2;
+        d.addLast("fetch");
+        d.addLast("a");
+        d.addLast("pail");
+        assert d.size() == 5;
+        d.addFirst("of water");
+        assert d.removeFirst() == "of water";
+        assert d.removeLast() == "pail";
+        assert d.size() == 4;
+        assert d.isEmpty() == false;
+        for (Iterator<String> words = d.iterator(); words.hasNext();) {
+            System.out.println(words.next());
+          }
+        System.out.println("END");
     }
 }
