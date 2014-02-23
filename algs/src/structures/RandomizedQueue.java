@@ -12,7 +12,7 @@ import edu.princeton.cs.introcs.StdRandom;
 public class RandomizedQueue<Item> implements Iterable<Item> {
 
     /**
-     * Size of the deque.
+     * Size of the Randomized Queue.
      */
     private static final int CAPACITY_START = 4;
 
@@ -67,7 +67,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             throw new NullPointerException();
         }
         if (N == s.length) {
-            resizeUp(N * 2);
+            resize(N * 2);
         }
         s[N++] = item;
     }
@@ -83,11 +83,12 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         }
         int removedIndex = StdRandom.uniform(N);
         Item item = s[removedIndex];
+        reorder(removedIndex);
+
         if (N > 0 && N < s.length / SHRINK_DIVISOR) {
-            resizeDown(removedIndex, s.length / 2);
-        } else {
-            reorder(removedIndex);
+            resize(s.length / 2);
         }
+
         return item;
     }
 
@@ -117,7 +118,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
      * Grow the array.
      * @param capacity the capacity.
      */
-    private void resizeUp(int capacity) {
+    private void resize(int capacity) {
 
         Item[] copy = (Item[]) new Object[capacity];
         for (int i = 0; i < N; i++) {
@@ -127,36 +128,14 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     }
 
     /**
-     * Shrink the array and remove an index.
-     * @param removedIndex the removed index.
-     * @param capacity the capacity.
-     */
-    private void resizeDown(int removedIndex, int capacity) {
-
-        int i, lastIndex;
-        Item[] copy = (Item[]) new Object[capacity];
-        for (i = 0; i < removedIndex; i++) {
-            copy[i] = s[i];
-        }
-        lastIndex = N - 1;
-        for (i = removedIndex; i < lastIndex; i++) {
-            copy[i] = s[i + 1];
-        }
-
-        s = copy;
-        --N;
-    }
-
-    /**
      * Resize the array.
      * @param removedIndex the removed index.
      */
     private void reorder(int removedIndex) {
 
         int lastIndex = N - 1;
-        for (int i = removedIndex; i < lastIndex; i++) {
-            s[i] = s[i + 1];
-        }
+        s[removedIndex] = s[lastIndex];
+        s[lastIndex] = null;
         --N;
     }
 
@@ -168,7 +147,24 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         /**
          * the index of the current element.
          */
-        private int current = N;
+        private int current = N - 1;
+
+        /**
+         * Indexes pointing to the outer class queue.
+         */
+        private int[] indexes;
+
+        /**
+         * Constructor
+         */
+        public RandomizedQueueIterator() {
+            
+            indexes = new int[N];
+            for (int i = 0; i < N; i++) {
+                indexes[i] = i;
+            }
+            StdRandom.shuffle(indexes);
+        }
 
         /**
          * Is there a next element?
@@ -176,7 +172,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
          */
         public boolean hasNext() {
 
-            return current > 0;
+            return current >= 0;
         }
 
         /**
@@ -196,7 +192,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            return s[--current];
+
+            return s[indexes[current--]];
         }
     }
 
@@ -213,7 +210,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         d.enqueue("Jack");
         assert d.size() == 1;
         assert d.isEmpty() == false;
-        assert d.dequeue() == "Jack";
+        assert d.dequeue().equals("Jack");
         assert d.isEmpty() == true;
         assert d.size() == 0;
 
@@ -221,10 +218,10 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         d.enqueue("Jill");
         assert d.size() == 2;
         String foo = d.dequeue();
-        assert foo == "Jill" || foo == "and";
+        assert foo.equals("Jill") || foo.equals("and");
         assert d.size() == 1;
         foo = d.dequeue();
-        assert foo == "Jill" || foo == "and";
+        assert foo.equals("Jill") || foo.equals("and");
         assert d.size() == 0;
         try {
             System.out.println(d.dequeue());
@@ -248,6 +245,16 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
             werds.next();
             System.out.println(d.sample());
         }
+        
+        RandomizedQueue<String> g = new RandomizedQueue<String>();
+        for(int i = 0; i < 1000; i++) {
+            g.enqueue("juicy");
+        }
+        int h = 0;
+        for (Iterator<String> testy = g.iterator(); testy.hasNext();) {
+            h++;
+        }
+        assert h == 1000;
         System.out.println("END");
     }
 }

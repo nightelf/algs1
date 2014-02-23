@@ -107,8 +107,11 @@ public class Deque<Item> implements Iterable<Item> {
         }
         conditionalShrink();
         head = getDecrementIndex(head);
+        Item temp = s[head];
+        s[head] = null;
         N--;
-        return s[head];
+        
+        return temp;
     }
 
     /**
@@ -121,10 +124,11 @@ public class Deque<Item> implements Iterable<Item> {
             throw new NoSuchElementException();
         }
         conditionalShrink();
-        int oldTail = tail;
+        Item oldItem = s[tail];
+        s[tail] = null;
         tail = getIncrementIndex(tail);
         N--;
-        return s[oldTail];
+        return oldItem;
     }
 
     /**
@@ -249,19 +253,19 @@ public class Deque<Item> implements Iterable<Item> {
         Deque<String> d = new Deque<String>();
 
         assert d.size() == 0;
-        assert d.isEmpty() == true;
+        assert d.isEmpty();
         d.addFirst("Jack");
-        assert d.isEmpty() == false;
-        assert d.removeFirst() == "Jack";
-        assert d.isEmpty() == true;
+        assert !d.isEmpty();
+        assert d.removeFirst().equals("Jack");
+        assert d.isEmpty();
         assert d.size() == 0;
         d.addFirst("and");
         assert d.size() == 1;
-        assert d.removeLast() == "and";
+        assert d.removeLast().equals("and");
         assert d.size() == 0;
         d.addLast("Jill");
         assert d.size() == 1;
-        assert d.removeFirst() == "Jill";
+        assert d.removeFirst().equals("Jill");
         assert d.size() == 0;
         try {
             System.out.println(d.removeFirst());
@@ -277,10 +281,10 @@ public class Deque<Item> implements Iterable<Item> {
         d.addLast("pail");
         assert d.size() == 5;
         d.addFirst("of water");
-        assert d.removeFirst() == "of water";
-        assert d.removeLast() == "pail";
+        assert d.removeFirst().equals("of water");
+        assert d.removeLast().equals("pail");
         assert d.size() == 4;
-        assert d.isEmpty() == false;
+        assert !d.isEmpty();
         for (Iterator<String> words = d.iterator(); words.hasNext();) {
             System.out.println(words.next());
           }
