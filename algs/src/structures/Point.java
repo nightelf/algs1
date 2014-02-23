@@ -1,10 +1,17 @@
 package structures;
 
+import java.util.Comparator;
+
 /**
  * Represents a point in the plane
  */
 public class Point implements Comparable<Point> {
 
+    /**
+     * Slope order comparator.
+     */
+    public final Comparator<Point> SLOPE_ORDER = new ByPoint();
+    
     /**
      * The x coordinate.
      */
@@ -81,5 +88,10 @@ public class Point implements Comparable<Point> {
         }
     }
     
-    public final Comparator<Point> SLOPE_ORDER;
+    private static class ByPoint implements Comparator<Point> {
+        
+        public int compare(Point p0, Point p1) {
+            return 0;
+        }
+    }
 }
