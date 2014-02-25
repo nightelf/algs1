@@ -11,7 +11,7 @@ public class Point implements Comparable<Point> {
      * Slope order comparator.
      */
     public final Comparator<Point> SLOPE_ORDER = new ByPoint();
-    
+
     /**
      * The x coordinate.
      */
@@ -32,7 +32,7 @@ public class Point implements Comparable<Point> {
      * Draw this point
      */
     public void draw() {
-        
+
     }
     
     /**
@@ -40,7 +40,7 @@ public class Point implements Comparable<Point> {
      * @param that a 2nd point
      */
     public void drawTo(Point that) {
-        
+
     }
     
     /**
@@ -48,7 +48,7 @@ public class Point implements Comparable<Point> {
      * @return String the string representation.
      */
     public String toString() {
-    
+
         return String.format("(%d, %d)", x, y);
     }
     
@@ -58,7 +58,7 @@ public class Point implements Comparable<Point> {
      * @return integer
      */
     public int compareTo(Point that) {
-        
+
         if (y < that.y || y == that.y && x < that.x) {
             return -1;
         } else if (y == that.y && x == that.x) {
@@ -67,14 +67,14 @@ public class Point implements Comparable<Point> {
             return 1;
         }
     }
-    
+
     /**
      * The slope between this point and that point.
      * @param that the other point
      * @return double
      */
     public double slopeTo(Point that) {
-        
+
         if (x == that.x) {
             if (y == that.y) {
                 return Double.NEGATIVE_INFINITY;
@@ -87,11 +87,28 @@ public class Point implements Comparable<Point> {
             return ((double) that.y - y) / (that.x - x);
         }
     }
-    
-    private static class ByPoint implements Comparator<Point> {
-        
-        public int compare(Point p0, Point p1) {
-            return 0;
+
+    /**
+     * Compares the 2 points by the reference.
+     */
+    private class ByPoint implements Comparator<Point> {
+
+        /**
+         * Compares the points.
+         * @param p1 point 1
+         * @param p2 point 2
+         */
+        public int compare(Point p1, Point p2) {
+
+            double p1Slope = slopeTo(p1);
+            double p2Slope = slopeTo(p2);
+            if (p1Slope < p2Slope) {
+                return -1;
+            } else if (p1Slope > p2Slope) {
+                return 1;
+            } else {
+                return 0;
+            }
         }
     }
 }
