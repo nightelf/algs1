@@ -2,6 +2,8 @@ package structures;
 
 import java.util.Comparator;
 
+import edu.princeton.cs.introcs.StdDraw;
+
 /**
  * Represents a point in the plane
  */
@@ -33,6 +35,7 @@ public class Point implements Comparable<Point> {
      */
     public void draw() {
 
+        StdDraw.point(x, y);
     }
     
     /**
@@ -41,6 +44,7 @@ public class Point implements Comparable<Point> {
      */
     public void drawTo(Point that) {
 
+        StdDraw.line(x, y, that.x, that.y);
     }
     
     /**
@@ -110,5 +114,33 @@ public class Point implements Comparable<Point> {
                 return 0;
             }
         }
+    }
+
+    /**
+     * Main
+     * @param args the command line args
+     */
+    public static void main(String[] args) {
+
+        System.out.println("Start");
+
+        Point foo = new Point(1, 1);
+        Point foo2 = new Point(1, 1);
+        Point zoo = new Point(2, 2);
+        Point loo = new Point(3, 3);
+        Point coo = new Point(4, 3);
+        Point roo = new Point(3, 4);
+        Point yoo = new Point(3, 2);
+
+        assert 0 == foo.SLOPE_ORDER.compare(zoo, loo);
+        assert -1 == foo.SLOPE_ORDER.compare(zoo, roo);
+        assert 1 == foo.SLOPE_ORDER.compare(zoo, yoo);
+        assert 0 == foo.compareTo(foo2);
+        assert -1 == foo.compareTo(zoo);
+        assert -1 == loo.compareTo(coo);
+        assert 1 == roo.compareTo(zoo);
+        assert "(3, 3)".equals(loo.toString());
+
+        System.out.println("End");
     }
 }
