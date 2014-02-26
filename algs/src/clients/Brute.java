@@ -15,7 +15,7 @@ import edu.princeton.cs.introcs.StdDraw;
 public class Brute {
 
     /**
-     * THe Set Size
+     * The Set Size
      */
     final private static int SET_SIZE = 4;
 
