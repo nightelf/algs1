@@ -94,45 +94,59 @@ public class Fast {
     private void search() {
         
         ArrayList<Point> tempPoints = new ArrayList<Point>();
-        double currentSlope = Double.NaN;
-        double lastSlope = Double.NaN;
+        double currentSlope, lastSlope;
         Point[] sortPoints = new Point[points.length - 1];
+        Boolean isTuplePrintable;
         
         for (int i = 0; i < points.length; i++) {
-            
+
             // get and sort points;
             for (int j = 0; j < points.length; j++) {
                 
                 if (j < i) {
-                    sortPoints[j] = points[i];
-                } else if (j < i) {
-                    sortPoints[j] = points[i - 1];
+                    sortPoints[j] = points[j];
+                } else if (j > i) {
+
+                    sortPoints[j - 1] = points[j];
                 }
             }
             Arrays.sort(sortPoints, points[i].SLOPE_ORDER);
             
-            
+            currentSlope = Double.NaN;
+            lastSlope = Double.NaN;
+            isTuplePrintable = false;
             for (int k = 0; k < sortPoints.length; k++) {
                 
                 currentSlope = points[i].slopeTo(sortPoints[k]);
-                if (
-                    Double.isNaN(lastSlope)
-                    || currentSlope == lastSlope
-                ) {
-                    
+                if ( k == 0 || currentSlope == lastSlope ) {
+                	
                     tempPoints.add(sortPoints[k]);
-                    lastSlope = currentSlope;
-                } else {
-                    
-                	if (tempPoints.size() >= SET_SIZE) {
+                  	if (k == sortPoints.length - 1 && tempPoints.size() >= SET_SIZE - 1) {
                 		
-                		printTuple(tempPoints.toArray());
+                		tempPoints.add(points[i]);
+                		Point[] foundPoints = tempPoints.toArray(new Point[tempPoints.size()]);
+                		printTuple(foundPoints);
+                		tempPoints.clear();
+                		isTuplePrintable = false;
                 	}
-                    lastSlope = Double.NaN;
-                    tempPoints.clear();
+
+                } else {
+                	
+                  	if (tempPoints.size() >= SET_SIZE - 1) {
+                		
+                		tempPoints.add(points[i]);
+                		Point[] foundPoints = tempPoints.toArray(new Point[tempPoints.size()]);
+                		printTuple(foundPoints);
+                		tempPoints.clear();
+                	}
                 }
+                
+  
+            	
+                lastSlope = currentSlope;
             }
         }
+        System.out.println("foopie");
     }
     
     /**
