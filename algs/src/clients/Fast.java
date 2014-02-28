@@ -31,10 +31,10 @@ public class Fast {
     private ArrayList<Point[]> foundCache = new ArrayList<Point[]>();
 
     /**
-     * Constructor
+     * Pseudo constructor 'cause of silly code inspector.
      * @param filename the filename
      */
-    private Fast(String filename) {
+    private void init(String filename) {
 
         setupDraw();
         points = read(filename);
@@ -149,6 +149,10 @@ public class Fast {
                 currentSlope = points[i].slopeTo(sortPoints[k]);
                 isChanged = lastSlope != currentSlope;
 
+                if (!isChanged) {
+                    tempPoints.add(sortPoints[k]);
+                }
+                
                 if ((isChanged || k == lastIndex && !isChanged) && tempPoints.size() >= SET_SIZE - 1) {
 
                     tempPoints.add(points[i]);
@@ -160,8 +164,9 @@ public class Fast {
 
                 if (isChanged) {
                     tempPoints.clear();
+                    tempPoints.add(sortPoints[k]);
                 }
-                tempPoints.add(sortPoints[k]);
+                
 
                 lastSlope = currentSlope;
             }
@@ -195,7 +200,8 @@ public class Fast {
      */
     public static void main(String[] args) {
 
-        Fast fast = new Fast(args[0]);
+        Fast fast = new Fast();
+        fast.init(args[0]);
         fast.search();
         fast.show();
     }

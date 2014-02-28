@@ -25,10 +25,10 @@ public class Brute {
     private Point[] points;
 
     /**
-     * Constructor
+     * Pseudo constructor 'cause of silly code inspector.
      * @param filename the filename
      */
-    private Brute(String filename) {
+    private void init(String filename) {
 
         setupDraw();
         points = read(filename);
@@ -143,7 +143,8 @@ public class Brute {
     public static void main(String[] args) {
 
         String filename = args[0];
-        Brute brute = new Brute(filename);
+        Brute brute = new Brute();
+        brute.init(filename);
         brute.search();
         brute.show();
     }
