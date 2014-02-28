@@ -11,8 +11,7 @@ import edu.princeton.cs.introcs.In;
 import edu.princeton.cs.introcs.StdDraw;
 
 /**
- * @author jared
- *
+ * The fast collinear point finder.
  */
 public class Fast {
 
@@ -25,6 +24,11 @@ public class Fast {
      * An array of the points
      */
     private Point[] points;
+
+    /**
+     * A cache of found collinear points.
+     */
+    private ArrayList<Point[]> foundCache = new ArrayList<Point[]>();
 
     /**
      * Constructor
@@ -47,7 +51,7 @@ public class Fast {
         StdDraw.setPenColor(StdDraw.BLUE);
         StdDraw.show(0);
     }
-    
+
     /**
      * Show the points and lines.
      */
@@ -55,100 +59,115 @@ public class Fast {
 
         StdDraw.show(0);
     }
-    
+
     /**
      * Prints the tuple.
      * @param collinearPoints the points (array[4]).
      */
-    private void printTuple(Point[] collinearPoints) {
+    private void printTupleConditionally(Point[] collinearPoints) {
 
         Arrays.sort(collinearPoints);
-        collinearPoints[0].drawTo(collinearPoints[3]);
-        System.out.println(
-            String.format(
-                "%s -> %s -> %s -> %s",
-                collinearPoints[0].toString(),
-                collinearPoints[1].toString(),
-                collinearPoints[2].toString(),
-                collinearPoints[3].toString()
-            )
-        );
+            if (!isDegenerateSlope(collinearPoints)) {
+                collinearPoints[0].drawTo(
+                    collinearPoints[collinearPoints.length -1]
+                );
+                String part;
+                String whole = "";
+                for (int i = 0; i < collinearPoints.length; i++) {
+                    part = i == collinearPoints.length - 1 ? "%s" : "%s -> ";
+                    whole += String.format(part ,collinearPoints[i].toString());
+                }
+                System.out.println(whole);
+        }
     }
-    
+
     /**
-     * Are the points collinear?
+     * Is the slope degenerate?
      * @param anyPoints any set of points
      * @return
      */
-    private boolean isCollinear(Point[] anyPoints) {
+    private boolean isDegenerateSlope(Point[] anyPoints) {
 
-        return anyPoints[0].slopeTo(anyPoints[1]) ==
-            anyPoints[0].slopeTo(anyPoints[2]) &&
-            anyPoints[0].slopeTo(anyPoints[1]) ==
-            anyPoints[0].slopeTo(anyPoints[3]);
+        boolean isDegenerate = false;
+        for (Point[] thePoints : foundCache) {
+            
+            if (Arrays.equals(anyPoints, thePoints)) {
+                isDegenerate = true;
+                break;
+            }
+        }
+        if (!isDegenerate) foundCache.add(anyPoints);
+
+        return isDegenerate;
     }
-    
+
+    /**
+     * Gets the sorted points.
+     * @param skipIndex the index currently being used as comparator.
+     * @return
+     */
+    private Point[] getSortedPoints(int skipIndex) {
+
+        Point[] sortPoints = new Point[points.length - 1];
+
+        for (int j = 0; j < points.length; j++) {
+
+            if (j < skipIndex) {
+                sortPoints[j] = points[j];
+            } else if (j > skipIndex) {
+
+                sortPoints[j - 1] = points[j];
+            }
+        }
+        Arrays.sort(sortPoints, points[skipIndex].SLOPE_ORDER);
+
+        return sortPoints;
+    }
+
     /**
      * Search the points.
      */
     private void search() {
-        
+
         ArrayList<Point> tempPoints = new ArrayList<Point>();
+        Point[] sortPoints;
         double currentSlope, lastSlope;
-        Point[] sortPoints = new Point[points.length - 1];
-        Boolean isTuplePrintable;
+        int lastIndex;
+        boolean isChanged;
         
         for (int i = 0; i < points.length; i++) {
 
             // get and sort points;
-            for (int j = 0; j < points.length; j++) {
-                
-                if (j < i) {
-                    sortPoints[j] = points[j];
-                } else if (j > i) {
-
-                    sortPoints[j - 1] = points[j];
-                }
-            }
-            Arrays.sort(sortPoints, points[i].SLOPE_ORDER);
-            
+            sortPoints = getSortedPoints(i);
+            lastIndex = sortPoints.length -1;
             currentSlope = Double.NaN;
             lastSlope = Double.NaN;
-            isTuplePrintable = false;
-            for (int k = 0; k < sortPoints.length; k++) {
-                
-                currentSlope = points[i].slopeTo(sortPoints[k]);
-                if ( k == 0 || currentSlope == lastSlope ) {
-                	
-                    tempPoints.add(sortPoints[k]);
-                  	if (k == sortPoints.length - 1 && tempPoints.size() >= SET_SIZE - 1) {
-                		
-                		tempPoints.add(points[i]);
-                		Point[] foundPoints = tempPoints.toArray(new Point[tempPoints.size()]);
-                		printTuple(foundPoints);
-                		tempPoints.clear();
-                		isTuplePrintable = false;
-                	}
+            tempPoints.clear();
 
-                } else {
-                	
-                  	if (tempPoints.size() >= SET_SIZE - 1) {
-                		
-                		tempPoints.add(points[i]);
-                		Point[] foundPoints = tempPoints.toArray(new Point[tempPoints.size()]);
-                		printTuple(foundPoints);
-                		tempPoints.clear();
-                	}
+            for (int k = 0; k < sortPoints.length; k++) {
+
+                currentSlope = points[i].slopeTo(sortPoints[k]);
+                isChanged = lastSlope != currentSlope;
+
+                if ((isChanged || k == lastIndex && !isChanged) && tempPoints.size() >= SET_SIZE - 1) {
+
+                    tempPoints.add(points[i]);
+                    Point[] foundPoints = tempPoints.toArray(
+                    	new Point[tempPoints.size()]
+                    );
+                    printTupleConditionally(foundPoints);
                 }
-                
-  
-            	
+
+                if (isChanged) {
+                    tempPoints.clear();
+                }
+                tempPoints.add(sortPoints[k]);
+
                 lastSlope = currentSlope;
             }
         }
-        System.out.println("foopie");
     }
-    
+
     /**
      * Reads the filename. Returns the points.
      * @param filename
@@ -159,7 +178,7 @@ public class Fast {
         In in = new In(filename);
         int N = in.readInt();
         Point[] thePoints = new Point[N];
-        
+
         for (int i = 0; i < N; i++) {
             int x = in.readInt();
             int y = in.readInt();
@@ -169,15 +188,15 @@ public class Fast {
         }
         return thePoints;
     }
-    
+
     /**
-     * @param args
+     * Main.
+     * @param args the arguments.
      */
     public static void main(String[] args) {
-        
+
         Fast fast = new Fast(args[0]);
         fast.search();
         fast.show();
     }
-
 }
