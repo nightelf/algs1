@@ -2,21 +2,43 @@ package puzzle8;
 
 public class Board {
 
+	final private int[][] blocks;
+	
+	final private int[][] goal;
+	
+	final private int N;
+	
     /**
      * Construct a board from an N-by-N array of blocks
      * (where blocks[i][j] = block in row i, column j)
      */
-    public Board() {
+    public Board(int[][] blocks) {
         
-        // TODO Auto-generated constructor stub
+    	this.blocks = blocks;
+    	this.goal = new int[this.blocks.length][this.blocks.length];
+    	N = this.blocks.length;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++)
+                goal[i][j] = N * i + j + 1;
+        }
     }
 
+    private int[] getIndicies(key) {
+    	
+    	int[] ret = new int[2];
+    	ret[0] = key / N;
+    	ret[1] = key / N;
+    	
+    	return ret
+    }
+    
     /**
      * Board dimension N.
      * @return
      */
     public int dimension() {
-        
+    	
+        return N;
     }
     
     /**
