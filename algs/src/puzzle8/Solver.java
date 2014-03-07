@@ -40,7 +40,8 @@ public class Solver {
          * @return Iterable<Board>
          */
         public Iterable<Board> solution() {
-            
+
+
         }
         
         /**
