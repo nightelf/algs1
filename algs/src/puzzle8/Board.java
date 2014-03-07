@@ -54,7 +54,19 @@ public class Board {
         }
         return ret;
     }
-    
+
+    /**
+     * Get copy of blocks int[][]
+     * @return int[][]
+     */
+    private int[][] getBlocksCopy() {
+
+        int[][] newBlocks =  new int[N][N];
+        for (int i = 0; i < N; i++)
+            newBlocks[i] = Arrays.copyOf(blocks[i], N);
+        return newBlocks;
+    }
+
     /**
      * Board dimension N.
      * @return
@@ -82,19 +94,19 @@ public class Board {
     }
     
     /**
-     * Sum of Manhattan distances between blocks and goal
+     * Sum of Manhattan distances between blocks and goal.
      * @return
      */
     public int manhattan() {
-        int x, y;
+        int[] goalIndicies;
         int manhattan = 0;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-            	
-                	manhattan += (i - x) + (j - y);
-                
+                goalIndicies = getIndicies(blocks[i][j]);
+                manhattan += Math.abs(i - goalIndicies[0]) + Math.abs(j - goalIndicies[1]);
             }
         }
+        return manhattan;
     }
     
     /**
@@ -102,15 +114,25 @@ public class Board {
      * @return
      */
     public boolean isGoal() {
-        
+
+        return Arrays.deepEquals(blocks, goal);
     }
     
     /**
-     * A board obtained by exchanging two adjacent blocks in the same row
+     * A board obtained by exchanging two adjacent blocks in the same row.
      * @return
      */
     public Board twin() {
-        // 
+        int i = emptyIndex[0] != 0 ? 0 : 1;
+        int j = N - 1;
+        int k = N - 2;
+        int temp;
+        int[][] blocksCopy = getBlocksCopy();
+        // swap
+        temp = blocksCopy[i][j];
+        blocksCopy[i][j] = blocksCopy[i][k];
+        blocksCopy[i][k] = temp;
+        return new Board(blocks);
     }
     
     /**
@@ -118,11 +140,15 @@ public class Board {
      */
     public boolean equals(Object y) {
 
-        return blocks.equals(y)
+        if (y == this) return true;
+        if (y == null) return false;
+        if (y.getClass() != this.getClass()) return false;
+        Board that = (Board) y;
+        return Arrays.deepEquals(blocks, that.blocks);
     }
     
     /**
-     * all neighboring boards
+     * all neighboring boards.
      * @return Iterator<Board>
      */
     public Iterator<Board> neighbors() {
@@ -131,16 +157,16 @@ public class Board {
     }
 
     /**
-     * String representation of the board (in the output format specified below)
+     * String representation of the board (in the output format specified below).
      */
     public String toString() {
 
         String aString = "";
         int i, j;
         for (i = 0; i < N; i++) {
-            for (j = 0; j < N; j++ ) {
-                aString = aString + " " + a[i][j];
-            }
+            for (j = 0; j < N; j++ )
+                aString = aString + " " + (a[i][j] != 0 ? a[i][j] : ' ');
+
             aString = aString + "\n";
         }
         return aString;
@@ -184,35 +210,34 @@ public class Board {
             boards = (Board[]) genBoards.toArray();
         }
 
-            /**
-             * Is there a next element?
-             * @return boolean
-             */
-            public boolean hasNext() {
+        /**
+         * Is there a next element?
+         * @return boolean
+         */
+        public boolean hasNext() {
 
-                return current < boards.length - 1;
+            return current < boards.length - 1;
+        }
+
+        /**
+         * Not implemented.
+         */
+        public void remove() {
+
+            throw new UnsupportedOperationException();
+        }
+
+        /**
+         * Return the next Board.
+         * @return Board
+         */
+        public Board next() {
+
+            if (!hasNext()) {
+                throw new NoSuchElementException();
             }
-
-            /**
-             * Not implemented.
-             */
-            public void remove() {
-
-                throw new UnsupportedOperationException();
-            }
-
-            /**
-             * Return the next Board.
-             * @return Board
-             */
-            public Board next() {
-
-                if (!hasNext()) {
-                    throw new NoSuchElementException();
-                }
-
-                return boards[current++];
-            }
+            return boards[current++];
+        }
 
         /**
          * Gets a neighbor Board.
@@ -223,9 +248,10 @@ public class Board {
         private Board getNeighborBoard(int i, int j) {
 
             if (isValidIndex(i) && isValidIndex(j)) {
-                int[][] newBlocks =  new int[N][N];
-                for (int k = 0; k < N; k++)
-                    newBlocks[k] = Arrays.copyOf(blocks[k], N);
+                int[][] newBlocks = getBlocksCopy();
+                // swap
+                newBlocks[emptyIndex[0]][emptyIndex[1]] = newBlocks[i][j];
+                newBlocks[i][j] = 0;
                 return new Board(newBlocks);
             }
             return null;
