@@ -165,7 +165,7 @@ public class Board {
         int i, j;
         for (i = 0; i < N; i++) {
             for (j = 0; j < N; j++ )
-                aString = aString + " " + (a[i][j] != 0 ? a[i][j] : ' ');
+                aString = aString + " " + (blocks[i][j] != 0 ? blocks[i][j] : ' ');
 
             aString = aString + "\n";
         }
