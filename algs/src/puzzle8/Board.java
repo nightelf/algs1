@@ -15,6 +15,8 @@ public class Board {
 
     final private int[] emptyIndex = new int[2];
     
+    private Boolean isTheGoal;
+    
     /**
      * Construct a board from an N-by-N array of blocks
      * (where blocks[i][j] = block in row i, column j)
@@ -22,23 +24,28 @@ public class Board {
     public Board(int[][] blocks) {
         
         this.blocks = blocks;
-        this.goal = new int[this.blocks.length][this.blocks.length];
         N = this.blocks.length;
+        this.goal = new int[N][N];
 
         // generate the target board
         for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++)    {
+            for (int j = 0; j < N; j++) {
                 goal[i][j] = N * i + j + 1;
 
                 // set the empty index
                 if (blocks[i][j] == 0) {
                     emptyIndex[0] = i;
                     emptyIndex[1] = j;
+                    System.out.println(emptyIndex[0]);
+                    System.out.println(emptyIndex[0]);
+                    System.out.println(emptyIndex[1]);
                 }
 
             }
         }
         goal[N - 1][N - 1] = 0;
+        
+        
     }
 
     private int[] getIndicies(int number) {
@@ -115,7 +122,9 @@ public class Board {
      */
     public boolean isGoal() {
 
-        return Arrays.deepEquals(blocks, goal);
+        if (null == isTheGoal)
+            isTheGoal = new Boolean(Arrays.deepEquals(blocks, goal));
+        return isTheGoal;
     }
     
     /**
@@ -123,6 +132,7 @@ public class Board {
      * @return
      */
     public Board twin() {
+    	
         int i = emptyIndex[0] != 0 ? 0 : 1;
         int j = N - 1;
         int k = N - 2;
@@ -151,7 +161,7 @@ public class Board {
      * all neighboring boards.
      * @return Iterator<Board>
      */
-    public Iterator<Board> neighbors() {
+    public Iterable<Board> neighbors() {
 
         return new NeighborIterator();
     }
@@ -162,11 +172,13 @@ public class Board {
     public String toString() {
 
         String aString = "";
-        int i, j;
-        for (i = 0; i < N; i++) {
-            for (j = 0; j < N; j++ )
-                aString = aString + " " + (blocks[i][j] != 0 ? blocks[i][j] : ' ');
+        String blockString;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++ ) {
 
+                blockString = blocks[i][j] == 0 ? " " : Integer.toString(blocks[i][j]);
+                aString = aString + " " + blockString;
+            }
             aString = aString + "\n";
         }
         return aString;
@@ -175,17 +187,12 @@ public class Board {
     /**
      * Iterates over an array of Board which are neighbors of this object.
      */
-    private class NeighborIterator implements Iterator<Board> {
+    private class NeighborIterator implements Iterable<Board> {
 
         /**
          * The neighbor boards to the current Board.
          */
-        private Board[] boards;
-
-        /**
-         * The current index.
-         */
-        private int current = 0;
+        private ArrayList<Board> boards = new ArrayList<Board>();
 
         /**
          * Constructor.
@@ -193,7 +200,6 @@ public class Board {
         public NeighborIterator() {
 
             Board newBoard;
-            ArrayList<Board> genBoards = new ArrayList<Board>();
 
             int[][] neighbors = {
                     {emptyIndex[0], emptyIndex[1] - 1}, // Top
@@ -205,40 +211,15 @@ public class Board {
             for (int i[] : neighbors) {
                 newBoard = getNeighborBoard(i[0], i[1]);
                 if (null != newBoard)
-                    genBoards.add(newBoard);
+                    boards.add(newBoard);
             }
-            boards = (Board[]) genBoards.toArray();
         }
 
-        /**
-         * Is there a next element?
-         * @return boolean
-         */
-        public boolean hasNext() {
+        public Iterator<Board> iterator() {
 
-            return current < boards.length - 1;
+            return boards.iterator();
         }
-
-        /**
-         * Not implemented.
-         */
-        public void remove() {
-
-            throw new UnsupportedOperationException();
-        }
-
-        /**
-         * Return the next Board.
-         * @return Board
-         */
-        public Board next() {
-
-            if (!hasNext()) {
-                throw new NoSuchElementException();
-            }
-            return boards[current++];
-        }
-
+        
         /**
          * Gets a neighbor Board.
          * @param i 1d array index
