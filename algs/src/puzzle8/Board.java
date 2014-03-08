@@ -36,9 +36,6 @@ public class Board {
                 if (blocks[i][j] == 0) {
                     emptyIndex[0] = i;
                     emptyIndex[1] = j;
-                    System.out.println(emptyIndex[0]);
-                    System.out.println(emptyIndex[0]);
-                    System.out.println(emptyIndex[1]);
                 }
 
             }
@@ -142,7 +139,7 @@ public class Board {
         temp = blocksCopy[i][j];
         blocksCopy[i][j] = blocksCopy[i][k];
         blocksCopy[i][k] = temp;
-        return new Board(blocks);
+        return new Board(blocksCopy);
     }
     
     /**

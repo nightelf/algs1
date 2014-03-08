@@ -39,33 +39,34 @@ public class Solver {
         
         board = initial;
         Board twin = board.twin();
+        SearchNode tempNode;
         
         SearchNode node = new SearchNode(board, null, 0);
         MinPQ<SearchNode> q = new MinPQ<SearchNode>(new ByManhattan());
         q.insert(node);
-        System.out.println(node.board.toString());
+
         SearchNode twinNode = new SearchNode(twin, null, 0);
         MinPQ<SearchNode> qTwin = new MinPQ<SearchNode>(new ByManhattan());
         qTwin.insert(twinNode);
-        System.out.println(twinNode.board.toString());
+
         while (!node.board.isGoal() && !twinNode.board.isGoal()) {
             
             node = q.delMin();
+
             twinNode = qTwin.delMin();
             solution.add(node.board);
             
-            
             for (Board i: node.board.neighbors()) {
-                node = new SearchNode(i, node.board, node.moves + 1);
-                if (!node.board.equals(node.prev)) {
-                    q.insert(node);
+            	tempNode = new SearchNode(i, node.board, node.moves + 1);
+                if (!tempNode.board.equals(node.prev)) {
+                    q.insert(tempNode);
                 }
             }
             
             for (Board i: twinNode.board.neighbors()) {
-                twinNode = new SearchNode(i, twinNode.board, twinNode.moves + 1);
-                if (!twinNode.board.equals(twinNode.prev)) {
-                    q.insert(twinNode);
+            	tempNode = new SearchNode(i, twinNode.board, twinNode.moves + 1);
+                if (!tempNode.board.equals(twinNode.prev)) {
+                	qTwin.insert(tempNode);
                 }
             }
         }
