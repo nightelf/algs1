@@ -5,24 +5,55 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import edu.princeton.cs.introcs.In;
+import edu.princeton.cs.introcs.StdOut;
+
+/**
+ * Board
+ */
 public class Board {
 
+    /**
+     * blocks.
+     */
     final private int[][] blocks;
-    
+
+    /**
+     * goal.
+     */
     final private int[][] goal;
-    
+
+    /**
+     * Size.
+     */
     final private int N;
 
+    /**
+     * Empty Index
+     */
     final private int[] emptyIndex = new int[2];
-    
+
+    /**
+     * Is The Goal.
+     */
     private Boolean isTheGoal;
-    
+
+    /**
+     * Cached Hamming Score.
+     */
+    private Integer hammingScore;
+
+    /**
+     * Cached Manhattan Score.
+     */
+    private Integer manhattanScore;
+
     /**
      * Construct a board from an N-by-N array of blocks
      * (where blocks[i][j] = block in row i, column j)
      */
     public Board(int[][] blocks) {
-        
+
         this.blocks = blocks;
         N = this.blocks.length;
         this.goal = new int[N][N];
@@ -41,8 +72,6 @@ public class Board {
             }
         }
         goal[N - 1][N - 1] = 0;
-        
-        
     }
 
     private int[] getIndicies(int number) {
@@ -76,43 +105,49 @@ public class Board {
      * @return
      */
     public int dimension() {
-        
         return N;
     }
-    
+
     /**
      * Number of blocks out of place
      * @return
      */
     public int hamming() {
-        
-        int hamming = 0;
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (goal[i][j] != blocks[i][j]) {
-                    hamming++;
+
+        if (null == hammingScore) {
+            hammingScore = 0;
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    if (goal[i][j] != blocks[i][j] && blocks[i][j] != 0) {
+                        hammingScore++;
+                    }
                 }
             }
         }
-        return hamming;
+        return hammingScore;
     }
-    
+
     /**
      * Sum of Manhattan distances between blocks and goal.
      * @return
      */
     public int manhattan() {
-        int[] goalIndicies;
-        int manhattan = 0;
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                goalIndicies = getIndicies(blocks[i][j]);
-                manhattan += Math.abs(i - goalIndicies[0]) + Math.abs(j - goalIndicies[1]);
+
+        if (null == manhattanScore) {
+            int[] goalIndicies;
+            manhattanScore = 0;
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    if (blocks[i][j] != 0) {
+                        goalIndicies = getIndicies(blocks[i][j]);
+                        manhattanScore += Math.abs(i - goalIndicies[0]) + Math.abs(j - goalIndicies[1]);
+                    }
+                }
             }
         }
-        return manhattan;
+        return manhattanScore;
     }
-    
+
     /**
      * Is this board the goal board?
      * @return
@@ -123,22 +158,24 @@ public class Board {
             isTheGoal = new Boolean(Arrays.deepEquals(blocks, goal));
         return isTheGoal;
     }
-    
+
     /**
      * A board obtained by exchanging two adjacent blocks in the same row.
      * @return
      */
     public Board twin() {
-    	
+
         int i = emptyIndex[0] != 0 ? 0 : 1;
         int j = N - 1;
         int k = N - 2;
         int temp;
         int[][] blocksCopy = getBlocksCopy();
+
         // swap
         temp = blocksCopy[i][j];
         blocksCopy[i][j] = blocksCopy[i][k];
         blocksCopy[i][k] = temp;
+
         return new Board(blocksCopy);
     }
     
@@ -216,7 +253,7 @@ public class Board {
 
             return boards.iterator();
         }
-        
+
         /**
          * Gets a neighbor Board.
          * @param i 1d array index
@@ -243,5 +280,19 @@ public class Board {
         private boolean isValidIndex(int index) {
             return index < N && index >= 0;
         }
+    }
+    
+    public static void main(String[] args) {
+
+        int[][] testBlocks= {
+            { 8, 1, 3 },
+            { 4, 0, 2 },
+            { 7, 6, 5 },
+        };
+        
+        Board testBoard = new Board(testBlocks); 
+
+        assert testBoard.hamming() == 5;
+        assert testBoard.manhattan() == 10;
     }
 }
