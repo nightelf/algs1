@@ -41,12 +41,12 @@ public class Board {
     /**
      * Cached Hamming Score.
      */
-    private Integer hammingScore;
+    private int hammingScore = -1;
 
     /**
      * Cached Manhattan Score.
      */
-    private Integer manhattanScore;
+    private int manhattanScore = -1;
 
     /**
      * Construct a board from an N-by-N array of blocks
@@ -114,7 +114,7 @@ public class Board {
      */
     public int hamming() {
 
-        if (null == hammingScore) {
+        if (-1 == hammingScore) {
             hammingScore = 0;
             for (int i = 0; i < N; i++) {
                 for (int j = 0; j < N; j++) {
@@ -133,7 +133,7 @@ public class Board {
      */
     public int manhattan() {
 
-        if (null == manhattanScore) {
+        if (-1 == manhattanScore) {
             int[] goalIndicies;
             manhattanScore = 0;
             for (int i = 0; i < N; i++) {
@@ -188,7 +188,15 @@ public class Board {
         if (y == null) return false;
         if (y.getClass() != this.getClass()) return false;
         Board that = (Board) y;
-        return Arrays.deepEquals(blocks, that.blocks);
+        
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (blocks[i][j] != that.blocks[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     
     /**

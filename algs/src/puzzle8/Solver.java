@@ -7,6 +7,7 @@ import java.util.Iterator;
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.introcs.In;
 import edu.princeton.cs.introcs.StdOut;
+import edu.princeton.cs.introcs.Stopwatch;
 
 /**
  * Solver class
@@ -216,7 +217,8 @@ public class Solver {
         for (int i = 0; i < N; i++)
             for (int j = 0; j < N; j++)
                 blocks[i][j] = in.readInt();
-
+        Stopwatch timer = new Stopwatch();
+        
         Board initial = new Board(blocks);
         // solve the puzzle
         Solver solver = new Solver(initial);
@@ -229,5 +231,6 @@ public class Solver {
             for (Board board : solver.solution())
                 StdOut.println(board);
         }
+        StdOut.println(timer.elapsedTime());
     }
 }
