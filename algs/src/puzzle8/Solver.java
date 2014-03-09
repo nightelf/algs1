@@ -16,17 +16,17 @@ public class Solver {
     /**
      * Number of moves
      */
-    int moves = 0;
+    private int moves = -1;
 
     /**
      * List of solution boards.
      */
-    ArrayList<Board> solution = new ArrayList<Board>();
+    private ArrayList<Board> solution = new ArrayList<Board>();
 
     /**
      * Is the 8-puzzle solvable?
      */
-    Boolean isSolvable;
+    private Boolean isSolvable;
 
     /**
      * find a solution to the initial board (using the A* algorithm)
@@ -71,7 +71,7 @@ public class Solver {
             moves = node.moves;
         } else {
             isSolvable = false;
-            moves = twinNode.moves;
+            moves = -1;
         }
     }
 
@@ -99,6 +99,9 @@ public class Solver {
      */
     public Iterable<Board> solution() {
 
+        if (!isSolvable()) {
+            return null;
+        }
         return new SolutionIterator();
     }
 

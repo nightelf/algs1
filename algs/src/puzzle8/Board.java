@@ -205,12 +205,14 @@ public class Board {
      */
     public String toString() {
 
-        String aString = "";
+        String aString = Integer.toString(N) + "\n";
         String blockString;
+        int n = 1 + (int) Math.floor(Math.log10(N * N));
+
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++ ) {
 
-                blockString = blocks[i][j] == 0 ? " " : Integer.toString(blocks[i][j]);
+                blockString = String.format("%" + Integer.toString(n) + "s", blocks[i][j]);
                 aString = aString + " " + blockString;
             }
             aString = aString + "\n";
@@ -278,6 +280,7 @@ public class Board {
          * @return Boolean
          */
         private boolean isValidIndex(int index) {
+
             return index < N && index >= 0;
         }
     }
@@ -291,7 +294,6 @@ public class Board {
         };
         
         Board testBoard = new Board(testBlocks); 
-
         assert testBoard.hamming() == 5;
         assert testBoard.manhattan() == 10;
     }
