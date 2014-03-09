@@ -140,11 +140,12 @@ public class Board {
 
         if (null == isTheGoal) {
             
+        	int max = N * N;
             int n = 1;
             isTheGoal = true;
             for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    if (blocks[i][j] != 0 && blocks[i][j] != n++) {
+                for (int j = 0; j < N && n < max; j++) {
+                    if (blocks[i][j] != n++) {
                         
                         isTheGoal = false;
                     }
@@ -338,6 +339,8 @@ public class Board {
                 { 8, 7, 0 },
             };
         Board testBoard3 = new Board(testBlocks3); 
+        assert testBoard3.hamming() == 2;
+        assert testBoard3.manhattan() == 2;
         assert testBoard3.isGoal() == false;
     }
 }

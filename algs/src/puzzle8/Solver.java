@@ -11,6 +11,7 @@ import edu.princeton.cs.introcs.Stopwatch;
 
 /**
  * Solver class
+ * @todo debug some more. Not finished.
  */
 public class Solver {
 
@@ -38,25 +39,34 @@ public class Solver {
         Board twin = initial.twin();
         SearchNode tempNode;
 
+        SearchNode prev = new SearchNode(null, null, 0);
+        SearchNode prevTwin = new SearchNode(null, null, 0);
+
         SearchNode node = new SearchNode(initial, null, 0);
-        MinPQ<SearchNode> q = new MinPQ<SearchNode>(new ByHamming());
+        MinPQ<SearchNode> q = new MinPQ<SearchNode>(new ByManhattan());
         q.insert(node);
 
         SearchNode twinNode = new SearchNode(twin, null, 0);
-        MinPQ<SearchNode> qTwin = new MinPQ<SearchNode>(new ByHamming());
+        MinPQ<SearchNode> qTwin = new MinPQ<SearchNode>(new ByManhattan());
         qTwin.insert(twinNode);
 
-        while (!node.board.isGoal() && !twinNode.board.isGoal()) {
+        while (!q.isEmpty() && !qTwin.isEmpty()
+                && !node.board.isGoal() && !twinNode.board.isGoal()) {
 
             node = q.delMin();
             twinNode = qTwin.delMin();
-            solution.add(node.board);
+            
+            if (node.prev == null || node.prev.equals(prev.board)) {
 
-            for (Board i: node.board.neighbors()) {
-                tempNode = new SearchNode(i, node.board, node.moves + 1);
-                if (!tempNode.board.equals(node.prev)) {
-                    q.insert(tempNode);
+                solution.add(node.board);
+
+                for (Board i: node.board.neighbors()) {
+                    tempNode = new SearchNode(i, node.board, node.moves + 1);
+                    if (!tempNode.board.equals(node.prev)) {
+                        q.insert(tempNode);
+                    }
                 }
+                prev = node;
             }
 
             for (Board i: twinNode.board.neighbors()) {
@@ -217,7 +227,7 @@ public class Solver {
         for (int i = 0; i < N; i++)
             for (int j = 0; j < N; j++)
                 blocks[i][j] = in.readInt();
-        Stopwatch timer = new Stopwatch();
+        //Stopwatch timer = new Stopwatch();
         
         Board initial = new Board(blocks);
         // solve the puzzle
@@ -231,6 +241,6 @@ public class Solver {
             for (Board board : solver.solution())
                 StdOut.println(board);
         }
-        StdOut.println(timer.elapsedTime());
+        //StdOut.println(timer.elapsedTime());
     }
 }
