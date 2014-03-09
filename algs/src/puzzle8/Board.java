@@ -19,11 +19,6 @@ public class Board {
     final private int[][] blocks;
 
     /**
-     * goal.
-     */
-    final private int[][] goal;
-
-    /**
      * Size.
      */
     final private int N;
@@ -31,7 +26,7 @@ public class Board {
     /**
      * Empty Index
      */
-    final private int[] emptyIndex = new int[2];
+    final private int[] emptyIndex;
 
     /**
      * Is The Goal.
@@ -56,22 +51,10 @@ public class Board {
 
         this.blocks = blocks;
         N = this.blocks.length;
-        this.goal = new int[N][N];
-
-        // generate the target board
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                goal[i][j] = N * i + j + 1;
-
-                // set the empty index
-                if (blocks[i][j] == 0) {
-                    emptyIndex[0] = i;
-                    emptyIndex[1] = j;
-                }
-
-            }
-        }
-        goal[N - 1][N - 1] = 0;
+        emptyIndex = new int[2];
+        emptyIndex[0] = -1;
+        hammingScore = -1;
+        manhattanScore = -1;
     }
 
     private int[] getIndicies(int number) {
@@ -115,10 +98,11 @@ public class Board {
     public int hamming() {
 
         if (-1 == hammingScore) {
+            int n = 1;
             hammingScore = 0;
             for (int i = 0; i < N; i++) {
                 for (int j = 0; j < N; j++) {
-                    if (goal[i][j] != blocks[i][j] && blocks[i][j] != 0) {
+                    if (blocks[i][j] != n++ && blocks[i][j] != 0) {
                         hammingScore++;
                     }
                 }
@@ -154,8 +138,20 @@ public class Board {
      */
     public boolean isGoal() {
 
-        if (null == isTheGoal)
-            isTheGoal = new Boolean(Arrays.deepEquals(blocks, goal));
+        if (null == isTheGoal) {
+            
+            int n = 1;
+            isTheGoal = true;
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    if (blocks[i][j] != 0 && blocks[i][j] != n++) {
+                        
+                        isTheGoal = false;
+                    }
+                }
+            }
+        }
+        
         return isTheGoal;
     }
 
@@ -165,6 +161,7 @@ public class Board {
      */
     public Board twin() {
 
+        setEmptyIndex();
         int i = emptyIndex[0] != 0 ? 0 : 1;
         int j = N - 1;
         int k = N - 2;
@@ -229,6 +226,24 @@ public class Board {
     }
 
     /**
+     * Gets the index of the empty square.
+     * @return int[][]
+     */
+    private void setEmptyIndex() {
+
+        if (emptyIndex[0] == -1) {
+            for (int i = 0; i < N; i++) {
+                for (int j = 0; j < N; j++) {
+                    if (blocks[i][j] == 0) {
+                        emptyIndex[0] = i;
+                        emptyIndex[1] = j;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Iterates over an array of Board which are neighbors of this object.
      */
     private class NeighborIterator implements Iterable<Board> {
@@ -244,7 +259,7 @@ public class Board {
         public NeighborIterator() {
 
             Board newBoard;
-
+            setEmptyIndex();
             int[][] neighbors = {
                     {emptyIndex[0], emptyIndex[1] - 1}, // Top
                     {emptyIndex[0] + 1, emptyIndex[1]}, // Right
@@ -292,7 +307,7 @@ public class Board {
             return index < N && index >= 0;
         }
     }
-    
+
     public static void main(String[] args) {
 
         int[][] testBlocks= {
@@ -304,5 +319,25 @@ public class Board {
         Board testBoard = new Board(testBlocks); 
         assert testBoard.hamming() == 5;
         assert testBoard.manhattan() == 10;
+        assert testBoard.isGoal() == false;
+        
+        int[][] testBlocks2= {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 7, 8, 0 },
+            };
+        
+        Board testBoard2 = new Board(testBlocks2);
+        assert testBoard2.hamming() == 0;
+        assert testBoard2.manhattan() == 0;
+        assert testBoard2.isGoal() == true;
+        
+        int[][] testBlocks3= {
+                { 1, 2, 3 },
+                { 4, 5, 6 },
+                { 8, 7, 0 },
+            };
+        Board testBoard3 = new Board(testBlocks3); 
+        assert testBoard3.isGoal() == false;
     }
 }
