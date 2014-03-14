@@ -199,7 +199,7 @@ public class Board {
     
     /**
      * all neighboring boards.
-     * @return Iterator<Board>
+     * @return Iterable<Board>
      */
     public Iterable<Board> neighbors() {
 
