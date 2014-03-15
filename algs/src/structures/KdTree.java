@@ -1,9 +1,9 @@
 package structures;
 
-import edu.princeton.cs.algs4.Point2D;
-
 import java.util.ArrayList;
 import java.util.Comparator;
+
+import edu.princeton.cs.algs4.Point2D;
 
 /**
  * Kd Tree.
@@ -13,12 +13,12 @@ public class KdTree {
     /**
      * For vertical comparator.
      */
-	final public static Comparator<Node> FOR_VERTICAL = new ForVertical();
+    final public static Comparator<Node> FOR_VERTICAL = new ForVertical();
 
     /**
      * For horizontal comparator.
      */
-	final public static Comparator<Node> FOR_HORIZONTAL = new ForHorizontal();
+    final public static Comparator<Node> FOR_HORIZONTAL = new ForHorizontal();
 
     /**
      * The root node.
@@ -35,8 +35,6 @@ public class KdTree {
      */
     private int N = 0;
 
-
-
     /**
      * construct an empty set of points.
      */
@@ -49,6 +47,7 @@ public class KdTree {
      * @return
      */
     public boolean isEmpty() {
+
         return N == 0;
     }
 
@@ -97,27 +96,32 @@ public class KdTree {
     }
 
     /**
-     * Gets the Next comparator.
-     * @param c the comparator.
-     * @return Comparator<Node>
-     */
-    private Comparator<Node> getNext(Comparator<Node> c) {
-
-        if (c.getClass() == FOR_VERTICAL.getClass()) {
-            return FOR_HORIZONTAL;
-        } else {
-            return FOR_VERTICAL;
-        }
-    }
-
-    /**
      * does the set contain the point p?
      * @param p a point.
      * @return boolean
      */
     public boolean contains(Point2D p) {
 
-        return true;
+        return (get(p) != null);
+    }
+    
+
+    // value associated with the given key in subtree rooted at x; null if no such key
+    private Point2D get(Point2D p) {
+        
+        Node x = root;
+        Node find = new Node(p);
+        Comparator<Node> c = FOR_HORIZONTAL;
+        
+        while (x != null) {
+            c = getNext(c);
+            int cmp = c.compare(find, x);
+            if (cmp < 0) x = x.left;
+            else if (cmp > 0) x = x.right;
+            else if (x.equals(find)) return x.point;
+            else x = x.right;
+        }
+        return null;
     }
 
     /**
@@ -146,6 +150,20 @@ public class KdTree {
         return p; // TODO implement
     }
 
+    /**
+     * Gets the Next comparator.
+     * @param c the comparator.
+     * @return Comparator<Node>
+     */
+    private Comparator<Node> getNext(Comparator<Node> c) {
+
+        if (c.getClass() == FOR_VERTICAL.getClass()) {
+            return FOR_HORIZONTAL;
+        } else {
+            return FOR_VERTICAL;
+        }
+    }
+    
     /**
      * Node.
      */
@@ -230,15 +248,33 @@ public class KdTree {
     public static void main(String[] args) {
 
         KdTree kd = new KdTree();
-        kd.insert(new Point2D(0.5, 0.5));
+        
+        Point2D point1 = new Point2D(0.5, 0.5);
+        kd.insert(point1);
         assert kd.size() == 1;
-        kd.insert(new Point2D(0.4, 0.4));
+        assert kd.contains(point1);
+        assert false == kd.contains(new Point2D(0.7, 0.7));
+        
+        Point2D point2 = new Point2D(0.4, 0.4);
+        kd.insert(point2);
         assert kd.size() == 2;
-        kd.insert(new Point2D(0.5, 0.5));
+        assert kd.contains(point2);
+        
+        Point2D point3 = new Point2D(0.5, 0.5);
+        kd.insert(point3);
         assert kd.size() == 2;
-        kd.insert(new Point2D(0.5, 0.4));
+        assert kd.contains(point3);
+        
+        Point2D point4 = new Point2D(0.5, 0.4);
+        kd.insert(point4);
         assert kd.size() == 3;
-        kd.insert(new Point2D(0.6, 0.5));
+        assert kd.contains(point4);
+        
+        Point2D point5 = new Point2D(0.6, 0.5);
+        kd.insert(point5);
         assert kd.size() == 4;
+        assert kd.contains(point5);
+        assert false == kd.contains(new Point2D(0.6, 0.4));
+        assert false == kd.contains(new Point2D(0.6, 0.3));
     }
 }
