@@ -1,6 +1,7 @@
 package structures;
 
 import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.introcs.StdDraw;
 
 /*************************************************************************
  *  Compilation:  javac RectHV.java
@@ -44,6 +45,7 @@ public class RectHV {
 
     // draw this axis-aligned rectangle
     public void draw() {
+
         StdDraw.line(xmin, ymin, xmax, ymin);
         StdDraw.line(xmax, ymin, xmax, ymax);
         StdDraw.line(xmax, ymax, xmin, ymax);

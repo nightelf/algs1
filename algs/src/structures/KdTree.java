@@ -13,12 +13,12 @@ public class KdTree {
     /**
      * For vertical comparator.
      */
-    public final Comparator<Node> FOR_VERTICAL = new ForVertical();
+	final public static Comparator<Node> FOR_VERTICAL = new ForVertical();
 
     /**
      * For horizontal comparator.
      */
-    public final Comparator<Node> FOR_HORIZONTAL = new ForHorizontal();
+	final public static Comparator<Node> FOR_HORIZONTAL = new ForHorizontal();
 
     /**
      * The root node.
@@ -67,21 +67,31 @@ public class KdTree {
      */
     public void insert(Point2D p) {
         
+        if (null == p) return;
         root = insert(root, new Node(p), FOR_VERTICAL);
-        N++;
     }
     
     private Node insert (Node parent, Node child, Comparator<Node> c) {
 
-        if (null == root) return child;
-        else if (child.equals(parent)) return null;
+        if (null == parent) {
+            N++;
+            return child;
+        }
 
-        if (c.compare(child, parent) == -1) {
+        int comp = c.compare(child, parent);
+        if (comp == -1) {
+            
             parent.left = insert(parent.left, child, getNext(c));
-            N++;
-        } else {
+        } else if (comp == 1) {
+            
             parent.right = insert(parent.right, child, getNext(c));
-            N++;
+        } else {
+            
+            if (child.equals(parent)) {
+                if (!parent.equals(root)) return null;
+            } else {
+                parent.right = insert(parent.right, child, getNext(c));
+            }
         }
         return parent;
     }
@@ -133,7 +143,7 @@ public class KdTree {
      * @return
      */
     public Point2D nearest(Point2D p) {
-
+        return p; // TODO implement
     }
 
     /**
@@ -144,17 +154,17 @@ public class KdTree {
         /**
          * The point.
          */
-        private Point2D point;
+        public Point2D point;
 
         /**
          * The left/bottom subtree.
          */
-        private Node left;
+        public Node left;
 
         /**
          * The right/top subtree.
          */
-        private Node right;
+        public Node right;
 
         /**
          * Constructor.
@@ -180,7 +190,7 @@ public class KdTree {
     /**
      * Compares the nodes vertically.
      */
-    private class ForVertical implements Comparator<Node> {
+    private static class ForVertical implements Comparator<Node> {
 
         /**
          * Compares the Nodes.
@@ -198,7 +208,7 @@ public class KdTree {
     /**
      * Compares the nodes horizontally.
      */
-    private class ForHorizontal implements Comparator<Node> {
+    private static class ForHorizontal implements Comparator<Node> {
 
         /**
          * Compares the Nodes.
@@ -224,6 +234,11 @@ public class KdTree {
         assert kd.size() == 1;
         kd.insert(new Point2D(0.4, 0.4));
         assert kd.size() == 2;
-
+        kd.insert(new Point2D(0.5, 0.5));
+        assert kd.size() == 2;
+        kd.insert(new Point2D(0.5, 0.4));
+        assert kd.size() == 3;
+        kd.insert(new Point2D(0.6, 0.5));
+        assert kd.size() == 4;
     }
 }
