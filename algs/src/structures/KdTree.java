@@ -3,6 +3,7 @@ package structures;
 import java.util.ArrayList;
 
 import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.introcs.StdDraw;
 
 /**
  * Kd Tree.
@@ -131,9 +132,37 @@ public class KdTree {
      * draw all of the points to standard draw.
      */
     public void draw() {
-
+        
+        drawNode(root);
     }
 
+    /**
+     * Draw a node and it's descendants. TODO finish this.
+     * @param n
+     */
+    private void drawNode(Node n) {
+
+        if (n == null) return;
+
+        // draw line
+        StdDraw.setPenRadius(0.001);
+        if (n.isYvector) {
+            StdDraw.setPenColor(StdDraw.RED);
+            StdDraw.line(n.point.x(), 0.0, n.point.x(), 1.0);
+        } else {
+            StdDraw.setPenColor(StdDraw.BLUE);
+            StdDraw.line(0.0, n.point.y(), 1.0, n.point.y());
+        }
+
+        // draw point
+        StdDraw.setPenColor(StdDraw.BLACK);
+        StdDraw.setPenRadius(0.01);
+        StdDraw.point(n.point.x(), n.point.y());
+        
+        drawNode(n.left);
+        drawNode(n.right);
+    }
+    
     /**
      * all points in the set that are inside the rectangle.
      * @param rect
@@ -173,8 +202,8 @@ public class KdTree {
      * @return
      */
     public Point2D nearest(Point2D p) {
-        
-    	if (root == null) return null;
+
+        if (root == null) return null;
         found = root;
         Node nearme = new Node(p);
         nearestSearch(root, nearme);
@@ -409,5 +438,10 @@ public class KdTree {
         assert point4.equals(kd.nearest(new Point2D(0.49, 0.4)));
         assert point5.equals(kd.nearest(new Point2D(0.55, 0.55)));
         assert point1.equals(kd.nearest(new Point2D(0.54, 0.56)));
+        
+        StdDraw.setXscale(0, 1);
+        StdDraw.setYscale(0, 1);
+        kd.draw();
+        StdDraw.show(0);
     }
 }
