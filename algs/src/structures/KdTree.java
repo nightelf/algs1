@@ -174,6 +174,7 @@ public class KdTree {
      */
     public Point2D nearest(Point2D p) {
         
+    	if (root == null) return null;
         found = root;
         Node nearme = new Node(p);
         nearestSearch(root, nearme);
