@@ -1,7 +1,6 @@
 package structures;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 
 import edu.princeton.cs.algs4.Point2D;
 
@@ -11,24 +10,9 @@ import edu.princeton.cs.algs4.Point2D;
 public class KdTree {
 
     /**
-     * For vertical comparator.
-     */
-    final public static Comparator<Node> FOR_VERTICAL = new ForVertical();
-
-    /**
-     * For horizontal comparator.
-     */
-    final public static Comparator<Node> FOR_HORIZONTAL = new ForHorizontal();
-
-    /**
      * The root node.
      */
     private Node root;
-
-    /**
-     * The rectangle.
-     */
-    private RectHV rect;
 
     /**
      * The size of the KdTree
@@ -67,29 +51,33 @@ public class KdTree {
     public void insert(Point2D p) {
         
         if (null == p) return;
-        root = insert(root, new Node(p), FOR_VERTICAL);
+        root = insert(root, new Node(p));
+        root.isYvector = true;
     }
     
-    private Node insert (Node parent, Node child, Comparator<Node> c) {
+    private Node insert (Node parent, Node child) {
 
         if (null == parent) {
             N++;
             return child;
         }
 
-        int comp = c.compare(child, parent);
+        int comp = parent.compare(child);
         if (comp == -1) {
             
-            parent.left = insert(parent.left, child, getNext(c));
+            parent.left = insert(parent.left, child);
+            parent.setLeftOrientation();
         } else if (comp == 1) {
             
-            parent.right = insert(parent.right, child, getNext(c));
+            parent.right = insert(parent.right, child);
+            parent.setRightOrientation();
         } else {
             
             if (child.equals(parent)) {
                 if (!parent.equals(root)) return null;
             } else {
-                parent.right = insert(parent.right, child, getNext(c));
+                parent.right = insert(parent.right, child);
+                parent.setRightOrientation();
             }
         }
         return parent;
@@ -111,11 +99,10 @@ public class KdTree {
         
         Node x = root;
         Node find = new Node(p);
-        Comparator<Node> c = FOR_HORIZONTAL;
         
         while (x != null) {
-            c = getNext(c);
-            int cmp = c.compare(find, x);
+
+            int cmp = x.compare(find);
             if (cmp < 0) x = x.left;
             else if (cmp > 0) x = x.right;
             else if (x.equals(find)) return x.point;
@@ -138,9 +125,32 @@ public class KdTree {
      */
     public Iterable<Point2D> range(RectHV rect) {
         
-        return new ArrayList<Point2D>();
+        ArrayList<Point2D> list = new ArrayList<Point2D>();
+        
+        keys(root, list, rect);
+        return list;
     }
 
+    /**
+     * Recurse the tree and add contained points to the list.
+     * @param n
+     * @param list
+     * @param rect
+     */
+    private void keys(Node n, ArrayList<Point2D> list, RectHV rect) {
+
+        if (n == null) return;
+
+        int cmp = n.compare(rect);  
+        if (cmp < 0) keys(n.left, list, rect); 
+        else if (cmp > 0) keys(n.right, list, rect);
+        else {
+            if (rect.contains(n.point)) list.add(n.point);
+            keys(n.left, list, rect);
+            keys(n.right, list, rect);
+        }
+    } 
+    
     /**
      * a nearest neighbor in the set to p; null if set is empty.
      * @param p point
@@ -148,20 +158,6 @@ public class KdTree {
      */
     public Point2D nearest(Point2D p) {
         return p; // TODO implement
-    }
-
-    /**
-     * Gets the Next comparator.
-     * @param c the comparator.
-     * @return Comparator<Node>
-     */
-    private Comparator<Node> getNext(Comparator<Node> c) {
-
-        if (c.getClass() == FOR_VERTICAL.getClass()) {
-            return FOR_HORIZONTAL;
-        } else {
-            return FOR_VERTICAL;
-        }
     }
     
     /**
@@ -183,6 +179,11 @@ public class KdTree {
          * The right/top subtree.
          */
         public Node right;
+        
+        /**
+         * Does point denote a y-vector?
+         */
+        public boolean isYvector = false;
 
         /**
          * Constructor.
@@ -203,41 +204,55 @@ public class KdTree {
 
             return point.x() == n.point.x() && point.y() == n.point.y();
         }
-    }
-
-    /**
-     * Compares the nodes vertically.
-     */
-    private static class ForVertical implements Comparator<Node> {
-
+        
         /**
-         * Compares the Nodes.
-         * @param n1 node 1
-         * @param n2 node 2
+         * Compare 2 this Node and another.
+         * @param n
+         * @return
          */
-        public int compare(Node n1, Node n2) {
-
-            if (n1.point.x() < n2.point.x()) return -1;
-            else if (n1.point.x() > n2.point.x()) return 1;
-            else return 0;
+        public int compare(Node n) {
+            
+            if (isYvector) {
+                if (point.x() > n.point.x()) return -1;
+                if (point.x() < n.point.x()) return 1;
+                else return 0;
+            } else {
+                if (point.y() > n.point.y()) return -1;
+                if (point.y() < n.point.y()) return 1;
+                else return 0;
+            }
         }
-    }
-
-    /**
-     * Compares the nodes horizontally.
-     */
-    private static class ForHorizontal implements Comparator<Node> {
-
+        
         /**
-         * Compares the Nodes.
-         * @param n1 node 1
-         * @param n2 node 2
+         * Compare this node with the rectangle.
+         * @param rect
+         * @return
          */
-        public int compare(Node n1, Node n2) {
-
-            if (n1.point.y() < n2.point.y()) return -1;
-            else if (n1.point.y() > n2.point.y()) return 1;
-            else return 0;
+        public int compare(RectHV rect) {
+            
+            if (isYvector) {
+                if (point.x() > rect.xmax()) return -1;
+                if (point.x() < rect.xmin()) return 1;
+                else return 0;
+            } else {
+                if (point.y() > rect.ymax()) return -1;
+                if (point.y() < rect.ymin()) return 1;
+                else return 0;
+            }
+        }
+        
+        /**
+         * Set the orientation of the right Node.
+         */
+        public void setRightOrientation() {
+            right.isYvector = isYvector ? false : true; 
+        }
+        
+        /**
+         * Set the orientation of the Left Node.
+         */
+        public void setLeftOrientation() {
+            left.isYvector = isYvector ? false : true; 
         }
     }
 
@@ -276,5 +291,29 @@ public class KdTree {
         assert kd.contains(point5);
         assert false == kd.contains(new Point2D(0.6, 0.4));
         assert false == kd.contains(new Point2D(0.6, 0.3));
+        
+        //RectHV rect = new RectHV(0.55, 0.35, 0.65, 0.45);
+        RectHV rect = new RectHV(0.0, 0.0, 1.0, 1.0);
+        for (Point2D thePoint : kd.range(rect)) {
+        	System.out.println(thePoint.toString());
+        }
+        
+        System.out.println();
+        RectHV rect1 = new RectHV(0.45, 0.35, 0.55, 0.55);
+        for (Point2D thePoint : kd.range(rect1)) {
+        	System.out.println(thePoint.toString());
+        }
+        
+        System.out.println();
+        RectHV rect2 = new RectHV(0.35, 0.35, 0.55, 0.45);
+        for (Point2D thePoint : kd.range(rect2)) {
+        	System.out.println(thePoint.toString());
+        }
+        
+        System.out.println();
+        RectHV rect3 = new RectHV(0.55, 0.45, 0.6, 0.5);
+        for (Point2D thePoint : kd.range(rect3)) {
+        	System.out.println(thePoint.toString());
+        }
     }
 }
