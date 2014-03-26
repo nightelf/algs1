@@ -1,7 +1,7 @@
 package graph;
 
-import java.util.ArrayList;
-
+import edu.princeton.cs.algs4.ResizingArrayBag;
+import edu.princeton.cs.algs4.ST;
 import edu.princeton.cs.introcs.In;
 
 /**
@@ -9,7 +9,26 @@ import edu.princeton.cs.introcs.In;
  */
 public class WordNet {
 
-    private ArrayList<String> theSynsets;
+    /**
+     * Synsets.
+     */
+    private String[] synsets;
+    
+    /**
+     * SynsetsLength.
+     */
+    private int synsetsLength;
+    
+    /**
+     * Hypernyms.
+     */
+    private int[][] hypernyms;
+    
+    /**
+     * Nouns.
+     */
+    private ST<String, int[]> nouns;
+    
     /**
      * constructor takes the name of the two input files.
      * @param synsets a csv file
@@ -17,16 +36,46 @@ public class WordNet {
      */
     public WordNet(String synsets, String hypernyms) {
         
-        theSynsets = new ArrayList<String>();
+        this.synsets = new String[4];
+        nouns = new ST<String, int[]>();
+        this.hypernyms = new int[4][1];
+        
         In inSyn = new In(synsets);
+        In inHyper = new In(hypernyms);
+        int synsetId;
+        int[] nounIds1;
+        int[] nounIds2;
+        
         String line = inSyn.readLine();
         String[] fields;
 
         while (null != line) {
             fields = line.split(",");
-            theSynsets.add(Integer.parseInt(fields[0]), fields[1]);
+            synsetId = Integer.parseInt(fields[0]);
+            if (synsetId >= synsetsLength)
+                resizeSynsets((synsetId + 1) * 2);
+            this.synsets[synsetId] = fields[1];
+            fields = fields[1].split(" ");
+            
+            // TODO put in it's own function
+            for (int i = 0; i < fields.length; i++) {
+                if (nouns.contains(fields[i])) {
+                    nounIds1 = nouns.get(fields[i]);
+                    nounIds2 = new int[nounIds1.length + 1];
+                    for (int j = 0; j < nounIds1.length; j++) {
+                        nounIds2[j] = nounIds1[j];
+                    }
+                    nounIds2[nounIds2.length - 1] = synsetId;
+                } else {
+                    nounIds2 = new int[1];
+                    nounIds2[0] = synsetId;
+                }
+                nouns.put(fields[i], nounIds2);
+            }
             line = inSyn.readLine();
         }
+        
+        //hypernyms = new ArrayList<int>();
     }
 
     /**
@@ -34,7 +83,7 @@ public class WordNet {
      */
     public Iterable<String> nouns() {
         
-        return theSynsets;
+        return nouns;
     }
 
     /**
@@ -67,6 +116,19 @@ public class WordNet {
         return "";
     }
 
+    /**
+     * resize the underlying array holding the elements.
+     * @param capacity
+     */
+    private void resizeSynsets(int capacity) {
+        
+        assert capacity >= synsetsLength;
+        String[] temp = (String[]) new String[capacity];
+        for (int i = 0; i < synsetsLength; i++)
+            temp[i] = synsets[i];
+        synsets = temp;
+    }
+    
     /**
      * For unit testing of this class.
      * @param args
