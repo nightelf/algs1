@@ -126,19 +126,22 @@ public class SeamCarver {
      * @param a
      */
     public void removeHorizontalSeam(int[] a) {
-        
-        //TODO finish
+
+        // remove Seam from energy matrix
+        for (int i = 0; i < a.length; i++) {
+            energy[a[i]][i] = -1;
+        }
     }
 
     /**
      * remove vertical seam from current picture.
-     * @param a
+     * @param a an array of indexes to delete.
      */
     public void removeVerticalSeam(int[] a) {
         
-        //TODO finish
+        // remove Seam from energy matrix
         for (int i = 0; i < a.length; i++) {
-            //System.arraycopy(arg0, arg1, arg2, arg3, arg4);
+            energy[i][a[i]] = -1;
         }
     }
 }
