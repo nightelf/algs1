@@ -209,7 +209,15 @@ public class SeamCarver {
             pixels[i] = temp;
         }
         
-        // TODO recalculate affected energies.
+        // recalculate affected energies.
+        int start, end;
+        for (int y = 0; y < a.length; y++) {
+            start = (a[y] != 0) ? a[y] - 1 : a[y];
+            end = (a[y] != newLength - 1) ? a[y] + 1 : a[y];
+            for (int i = start; i < end; i++) {
+                pixels[y][i].energy = energy(y, i);
+            }
+        }
     }
 
     /**
