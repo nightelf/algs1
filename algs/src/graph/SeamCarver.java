@@ -5,7 +5,7 @@ import java.awt.Color;
 import edu.princeton.cs.introcs.Picture;
 
 /**
- * Created by jared on 4/2/14.
+ * Seam carver class
  */
 public class SeamCarver {
     
@@ -17,7 +17,7 @@ public class SeamCarver {
     /**
      * The energy array.
      */
-    private pixel[][] pixels;
+    private Pixel[][] pixels;
     
     /**
      * Constructor.
@@ -27,12 +27,12 @@ public class SeamCarver {
         
         int width = picture.width();
         int height = picture.height();
-        pixels = new pixel[height][width];
+        pixels = new Pixel[height][width];
         
         // fill energy grid
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                pixels[i][j] = new pixel(picture.get(j, i), energy(j, i));
+                pixels[i][j] = new Pixel(picture.get(j, i), energy(j, i));
             }
         }
     }
@@ -101,8 +101,8 @@ public class SeamCarver {
 
     /**
      * Compute the color difference.
-     * @param p1 pixel 1 color.
-     * @param p2 pixel 2 color.
+     * @param p1 Pixel 1 color.
+     * @param p2 Pixel 2 color.
      * @return
      */
     private double colorDiff(Color p1, Color p2) {
@@ -129,10 +129,55 @@ public class SeamCarver {
      */
     public int[] findVerticalSeam() {
         
-        // TODO finish
-        return new int[5];
+        // initialize vars
+        int width = pixels[0].length;
+        int height = pixels.length;
+        int heightIndex = height - 1;
+        int start, end;
+        double cumEnergy;
+        DirectedRowEdge[][] de = new DirectedRowEdge[height][width];
+        
+        // initialize 1st row
+        for (int i = 0; i < width; i++)
+            de[0][i] = new DirectedRowEdge(i, pixels[0][i].energy);
+        
+        // calculate shortest path
+        for (int y = 1; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                start = (x != 0) ? x - 1 : x;
+                end = (x != width - 1) ? x + 1 : x;
+                for (int i = start; i < end; i++) {
+                    de[y][x] = new DirectedRowEdge(i, Double.POSITIVE_INFINITY);
+                    cumEnergy = de[y - 1][i].cumEnergy + pixels[y][x].energy;
+                    if (cumEnergy < de[y][x].cumEnergy) {
+                        de[y][x].cumEnergy = cumEnergy;
+                        de[y][x].from = i;
+                    }
+                }
+            }
+        }
+        
+        // find lowest energy endpoint for the shortest path
+        cumEnergy = Double.POSITIVE_INFINITY;
+        int tempIndex = 0;
+        for (int i = 0; i < width; i++) {
+            if (de[heightIndex][i].cumEnergy < cumEnergy) {
+                cumEnergy = de[heightIndex][i].cumEnergy;
+                tempIndex = i;
+            }
+        }
+
+        // retrace shortest path and build seam.
+        int[]seam = new int[height];
+        seam[heightIndex] = tempIndex;
+        for (int i = heightIndex - 1; i >= 0; i--) {
+            seam[i] = de[i + 1][seam[i + 1]].from;
+        }
+        
+        return seam;
     }
 
+    
     /**
      * remove horizontal seam from current picture.
      * @param a
@@ -142,7 +187,7 @@ public class SeamCarver {
         // remove Seam from energy matrix
         int newLength = pixels[0].length - 1;
         for (int i = 0; i < a.length; i++) {
-            pixel[] temp = new pixel[newLength];
+            Pixel[] temp = new Pixel[newLength];
             System.arraycopy(pixels[a[i]], 0, temp, 0, i);
             System.arraycopy(pixels[a[i]], i + 1, temp, i, newLength - i);
             pixels[a[i]] = temp;
@@ -158,17 +203,19 @@ public class SeamCarver {
         // remove Seam from energy matrix
         int newLength = pixels[0].length - 1;
         for (int i = 0; i < a.length; i++) {
-            pixel[] temp = new pixel[newLength];
+            Pixel[] temp = new Pixel[newLength];
             System.arraycopy(pixels[i], 0, temp, 0, a[i]);
             System.arraycopy(pixels[i], a[i] + 1, temp, a[i], newLength - a[i]);
             pixels[i] = temp;
         }
+        
+        // TODO recalculate affected energies.
     }
 
     /**
      * Pixel contains color and energy information for a given pixel.
      */
-    private class pixel {
+    private class Pixel {
         
         /**
          * Representation of RGB color.
@@ -185,10 +232,42 @@ public class SeamCarver {
          * @param color the color
          * @param energy the energy
          */
-        public pixel(Color color, double energy) {
+        public Pixel(Color color, double energy) {
             
             this.color = color;
             this.energy = energy;
         }
+    }
+    
+    /**
+     * Pixel contains color and energy information for a given Pixel.
+     */
+    private class DirectedRowEdge {
+        
+        /**
+         * Representation of RGB color.
+         */
+        public int from;
+        
+        /**
+         * The calculated energy.
+         */
+        public double cumEnergy;
+        
+        /**
+         * Constructor.
+         * @param color the color
+         * @param energy the energy
+         */
+        public DirectedRowEdge(int from, double cumEnergy) {
+            
+            this.from = from;
+            this.cumEnergy = cumEnergy;
+        }
+    }
+
+    public static void main(String[] args) {
+        
+        
     }
 }
