@@ -141,6 +141,7 @@ public class SeamCarver {
         for (int i = 0; i < width; i++)
             de[0][i] = new DirectedRowEdge(i, pixels[0][i].energy);
         
+        // de matrix already topologically sorted by definition.
         // calculate shortest path
         for (int y = 1; y < height; y++) {
             for (int x = 0; x < width; x++) {
