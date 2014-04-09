@@ -286,9 +286,13 @@ public class SeamCarver {
         
     	Picture surfers = new Picture(args[0]);
         SeamCarver carver = new SeamCarver(surfers);
-        int[] vSeam = carver.findVerticalSeam();
-        for (int i = 0; i < vSeam.length; i++) {
-        	System.out.println(vSeam[i]);
+        for (int i = 0; i < 150; i++) {
+        	int[] vSeam = carver.findVerticalSeam();
+        	carver.removeVerticalSeam(vSeam);
         }
+        
+        Picture surfersNew = carver.picture();
+        surfers.show();
+        surfersNew.show();
     }
 }
