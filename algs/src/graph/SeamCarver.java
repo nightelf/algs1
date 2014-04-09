@@ -29,10 +29,17 @@ public class SeamCarver {
         int height = picture.height();
         pixels = new Pixel[height][width];
         
-        // fill energy grid
+        // fill colors
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                pixels[i][j] = new Pixel(picture.get(j, i), energy(j, i));
+                pixels[i][j] = new Pixel(picture.get(j, i), 0);
+            }
+        }
+        
+        // calculate and assign energy
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                pixels[i][j].energy = energy(j, i);
             }
         }
     }
@@ -82,18 +89,18 @@ public class SeamCarver {
      */
     public double energy(int x, int y) {
 
-        if (x == 0 || y == 0 || x == pixels[0].length || y == pixels.length) {
+        if (x == 0 || y == 0 || x == width() - 1 || y == height() - 1) {
             return EDGE_ENERGY;
         }
-        
+
         double horizontal = colorDiff(
-            pixels[x - 1][y].color,
-            pixels[x + 1][y].color
+            pixels[y][x - 1].color,
+            pixels[y][x + 1].color
         );
         
         double vertical = colorDiff(
-            pixels[x][y - 1].color,
-            pixels[x][y + 1].color
+            pixels[y - 1][x].color,
+            pixels[y + 1][x].color
         );
 
         return horizontal + vertical;
@@ -277,6 +284,7 @@ public class SeamCarver {
 
     public static void main(String[] args) {
         
-        
+    	Picture surfers = new Picture(args[0]);
+        SeamCarver carver = new SeamCarver(surfers);
     }
 }
