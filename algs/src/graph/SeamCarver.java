@@ -154,8 +154,8 @@ public class SeamCarver {
             for (int x = 0; x < width; x++) {
                 start = (x != 0) ? x - 1 : x;
                 end = (x != width - 1) ? x + 1 : x;
-                for (int i = start; i < end; i++) {
-                    de[y][x] = new DirectedRowEdge(i, Double.POSITIVE_INFINITY);
+                de[y][x] = new DirectedRowEdge(x, Double.POSITIVE_INFINITY);
+                for (int i = start; i <= end; i++) {
                     cumEnergy = de[y - 1][i].cumEnergy + pixels[y][x].energy;
                     if (cumEnergy < de[y][x].cumEnergy) {
                         de[y][x].cumEnergy = cumEnergy;
@@ -286,5 +286,9 @@ public class SeamCarver {
         
     	Picture surfers = new Picture(args[0]);
         SeamCarver carver = new SeamCarver(surfers);
+        int[] vSeam = carver.findVerticalSeam();
+        for (int i = 0; i < vSeam.length; i++) {
+        	System.out.println(vSeam[i]);
+        }
     }
 }
